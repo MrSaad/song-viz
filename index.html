@@ -1,0 +1,1181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body>
+<script>
+/*
+  BLOODLINE — a generative visual for new.mp3
+  Everything (page, styles, audio, visuals) is built by this script; keep new.mp3 next to this file.
+  click / space: play-pause    ← →: seek 10s
+
+  Story (follows the song's three verses and its hook):
+    intro    a faint spinning record (the cycle) and a moon coming up
+    verse 1  childhood night: the moon in a window whose cross is pulled down, prayer light,
+             two small lights (mother and child), a warped drunken haze, tears, an impact that cracks the room
+    chorus   the record turns to a blood-red heart: pulses pumped in / out along veins,
+             a searchlight sweeps for someone and finds an empty ring
+    verse 2  fatherhood: a warm light gives birth to a small one that drifts away and turns cold,
+             the cracks and the haze come back (the cycle repeats), unanswered echo rings
+    verse 3  smoke, a mother's light, an empty house drawn in line, a light that never arrives,
+             the record cracks and skips
+    outro    the search goes on and ends where it began: the child under the moon in the window
+*/
+(() => {
+'use strict';
+const SRC = 'new.mp3';
+const TITLE = 'Bloodline';
+
+// ---- analysed from new.mp3: ~99.4 bpm, 386 beats, music ends 231.6s ----
+const BEATS = [0.116,0.72,1.3,1.95,2.554,3.158,3.738,4.319,4.923,5.55,6.153,6.757,7.338,7.941,8.522,9.149,9.752,10.356,10.937,11.54,12.144,12.748,13.351,13.955,14.559,15.209,15.882,16.533,17.206,17.833,18.413,19.04,19.621,20.201,20.852,21.432,22.059,22.616,23.197,23.824,24.451,25.054,25.635,26.239,26.842,27.446,28.026,28.653,29.234,29.814,30.441,31.045,31.626,32.206,32.81,33.414,34.064,34.644,35.248,35.828,36.432,37.036,37.64,38.22,38.824,39.427,40.008,40.658,41.239,41.819,42.423,43.027,43.63,44.234,44.838,45.441,46.022,46.602,47.229,47.833,48.437,49.041,49.621,50.248,50.852,51.455,52.059,52.64,53.243,53.847,54.428,55.147,55.798,56.517,57.121,57.702,58.305,58.932,59.536,60.14,60.743,61.347,61.928,62.531,63.135,63.739,64.319,64.923,65.503,66.13,66.734,67.315,67.918,68.522,69.126,69.73,70.31,70.937,71.517,72.144,72.748,73.352,73.932,74.536,75.14,75.743,76.347,76.928,77.531,78.135,78.762,79.366,79.97,80.55,81.154,81.734,82.338,82.942,83.545,84.126,84.753,85.333,85.937,86.541,87.098,87.586,88.189,88.863,89.49,90.117,90.72,91.347,91.951,92.532,93.135,93.739,94.343,94.923,95.527,96.131,96.734,97.338,97.942,98.545,99.149,99.753,100.333,100.937,101.541,102.121,102.725,103.329,103.956,104.536,105.14,105.744,106.347,106.974,107.555,108.135,108.739,109.366,109.946,110.55,111.154,111.734,112.338,112.942,113.546,114.149,114.73,115.334,115.96,116.541,117.145,117.748,118.352,118.956,119.536,120.14,120.744,121.371,121.951,122.555,123.159,123.739,124.32,124.923,125.55,126.131,126.735,127.338,127.942,128.546,129.126,129.73,130.334,130.937,131.518,132.145,132.748,133.352,133.933,134.536,135.14,135.744,136.324,136.928,137.532,138.136,138.716,139.343,139.947,140.55,141.131,141.735,142.362,142.965,143.546,144.126,144.73,145.334,145.937,146.541,147.145,147.749,148.352,148.933,149.537,150.14,150.744,151.324,151.928,152.532,153.136,153.739,154.343,154.947,155.55,156.154,156.758,157.338,157.942,158.546,159.126,159.73,160.311,160.938,161.564,162.168,162.725,163.329,163.956,164.56,165.164,165.744,166.325,166.951,167.509,168.136,168.739,169.32,169.947,170.551,171.131,171.735,172.339,172.942,173.546,174.15,174.753,175.334,175.938,176.565,177.168,177.726,178.329,178.933,179.56,180.14,180.744,181.348,181.952,182.532,183.136,183.74,184.366,184.947,185.551,186.154,186.758,187.339,187.942,188.546,189.15,189.753,190.334,190.938,191.518,192.099,192.586,193.074,193.631,194.258,194.862,195.442,196.023,196.65,197.254,197.834,198.391,199.018,199.599,200.133,200.667,201.178,201.758,202.339,202.942,203.546,204.15,204.754,205.357,205.938,206.541,207.145,207.749,208.353,208.956,209.56,210.164,210.744,211.348,211.952,212.555,213.159,213.74,214.343,214.947,215.551,216.131,216.735,217.339,217.919,218.546,219.127,219.73,220.357,220.938,221.542,222.145,222.749,223.33,223.933,224.537,225.141,225.742,226.343,226.944,227.545,228.146,228.747,229.348,229.949,230.55,231.151];
+const ACCENT = [0.9,0.1,0.14,0.52,0.39,0.21,0.2,0.59,0.4,0.1,0.18,0.41,0.43,0.11,0.18,0.46,0.85,0.16,0.12,0.53,0.37,0.16,0.15,0.51,0.5,0.11,0.3,0.08,0.17,0.41,0.78,0.21,0.9,0.4,0.51,0.68,0.57,0.59,0.32,0.82,0.33,0.6,0.79,0.64,0.18,0.45,0.69,0.17,0.43,0.77,0.37,0.56,0.63,1.0,0.97,0.63,0.39,0.51,0.23,0.36,0.18,0.42,0.51,0.43,0.26,0.45,1.0,0.54,0.79,0.77,0.32,0.85,0.31,0.43,0.71,0.3,0.51,0.5,0.25,0.73,0.38,0.58,0.61,0.39,0.27,0.4,0.4,0.32,0.23,0.52,0.79,0.57,0.45,0.31,0.68,0.54,1.0,0.76,0.37,0.42,1.0,1.0,0.31,0.55,0.86,0.47,0.29,0.43,0.52,0.7,0.38,0.38,0.94,0.93,0.39,0.34,0.82,0.85,0.32,0.5,0.68,0.54,0.2,0.6,0.49,0.71,0.15,0.55,0.08,0.96,0.18,0.55,0.11,0.79,0.12,0.57,0.07,0.91,0.13,0.82,0.7,0.8,0.7,0.51,1.0,1.0,0.6,0.85,0.95,0.14,0.61,0.64,0.6,0.9,0.49,0.23,0.14,0.36,0.72,0.77,0.73,0.13,0.86,1.0,0.77,0.24,0.93,1.0,0.99,0.36,1.0,0.66,0.83,0.4,0.85,0.51,0.83,0.36,1.0,0.59,0.64,0.12,0.37,0.6,0.75,0.31,0.56,0.12,0.56,0.08,0.63,0.48,0.72,0.38,0.57,0.52,0.54,0.1,0.64,0.56,0.79,0.46,0.67,0.15,0.11,0.24,0.64,0.5,0.93,0.89,0.39,0.41,0.75,0.89,0.29,0.45,0.77,0.49,0.25,0.43,0.45,0.52,0.43,0.21,0.87,0.93,0.39,0.49,0.71,0.87,0.32,0.42,0.56,0.55,0.22,0.5,0.49,0.53,0.6,0.67,0.73,0.97,0.21,0.76,0.54,0.79,0.13,0.64,0.57,0.89,0.14,0.76,0.12,0.3,0.5,0.58,0.38,0.15,0.65,0.65,0.21,0.21,1.0,0.6,0.31,0.56,1.0,0.29,0.3,0.35,0.87,0.64,0.47,0.21,0.57,0.39,0.23,0.18,0.94,0.81,0.44,0.44,0.66,0.35,0.65,1.0,1.0,0.7,0.46,0.34,0.36,0.52,0.94,0.32,0.24,0.66,0.76,0.94,0.45,0.54,0.76,1.0,0.3,0.57,0.58,0.54,0.23,0.67,0.4,0.74,0.36,0.65,0.43,0.9,0.38,0.44,1.0,1.0,0.42,0.65,0.34,0.41,0.69,0.3,0.26,0.43,0.74,0.42,0.27,0.4,0.47,0.35,0.59,0.12,0.17,0.45,0.24,0.67,0.52,0.49,0.35,0.75,0.53,0.42,0.3,0.64,0.44,0.43,0.32,0.45,0.06,0.38,0.67,0.63,0.78,0.12,0.69,0.5,0.65,0.13,0.55,0.47,0.44,0.45,0.51,0.14,0.5,0.13,0.81,0.64,0.76,0.15,0.68,0.61,0.77,0.2,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5];
+const WORDS = [[17.26,18.14],[18.14,19.02],[19.02,19.56],[19.56,20.16],[20.16,20.46],[20.46,20.86],[20.86,21.4],[21.4,21.76],[21.76,22.28],[22.28,22.62],[22.62,22.88],[22.88,23.22],[23.22,23.68],[23.68,24.16],[24.16,25.04],[25.04,25.4],[25.4,25.54],[25.54,25.98],[25.98,26.22],[26.22,26.48],[26.48,26.92],[26.92,28.18],[28.18,28.62],[28.62,28.88],[28.88,29.16],[29.16,29.54],[29.54,29.78],[29.78,30.12],[30.12,30.54],[30.54,31.02],[31.02,31.42],[31.42,31.8],[31.8,32.16],[32.16,32.4],[32.4,32.82],[32.82,33.12],[33.12,33.44],[33.44,33.98],[33.98,34.28],[34.28,34.88],[34.88,35.28],[35.28,35.88],[35.88,36.16],[36.16,37.24],[37.88,37.88],[37.88,38.2],[38.2,38.46],[38.46,39.3],[39.3,40.28],[40.28,40.58],[40.58,40.86],[40.86,41.28],[41.28,41.44],[41.44,41.82],[41.82,42.38],[42.38,42.86],[42.86,43.64],[43.64,45.26],[45.26,45.46],[45.46,45.68],[45.68,45.98],[45.98,46.42],[46.42,46.6],[46.6,46.78],[46.78,47.46],[47.46,47.84],[47.84,48.12],[48.12,49.18],[49.18,50.3],[50.3,50.84],[50.84,51.16],[51.16,51.48],[51.48,52.04],[52.08,52.38],[52.38,52.68],[52.68,52.92],[52.92,53.6],[54.06,54.72],[54.72,55.02],[55.02,55.34],[55.34,56.52],[56.52,57.16],[57.16,57.52],[57.52,58.22],[59.24,59.66],[59.66,59.9],[59.9,60.58],[61.66,62.06],[62.06,62.22],[62.22,62.88],[62.88,63.74],[63.74,64.2],[64.2,64.96],[64.96,65.58],[65.58,66.84],[66.84,67.14],[67.14,67.68],[68.88,69.22],[69.22,69.5],[69.5,70.2],[71.26,71.68],[71.68,71.88],[71.88,72.56],[72.56,73.32],[73.32,73.8],[73.8,74.6],[74.6,75.74],[85.34,86.14],[86.14,86.54],[86.54,86.9],[86.9,87.42],[87.42,87.72],[87.72,88.12],[88.12,88.54],[88.54,88.88],[88.88,89.22],[89.22,89.58],[89.58,89.82],[89.82,90.24],[90.24,90.56],[90.56,91.08],[91.08,91.48],[91.48,91.76],[91.76,92.26],[92.26,92.62],[92.62,92.78],[92.78,92.94],[92.94,93.24],[93.24,93.64],[93.64,94.0],[95.16,95.8],[95.8,96.1],[96.1,96.44],[96.44,96.82],[96.82,96.98],[96.98,97.3],[97.3,97.58],[97.58,98.04],[98.04,98.3],[98.3,98.54],[98.54,99.06],[99.06,99.36],[99.36,99.74],[99.74,100.26],[100.26,100.56],[100.56,100.9],[100.9,101.32],[101.32,101.54],[101.54,101.8],[101.8,102.14],[102.14,102.6],[102.6,103.08],[103.08,103.26],[103.26,104.14],[104.14,104.94],[104.94,105.18],[105.18,105.4],[105.4,105.68],[105.68,106.6],[106.6,107.5],[107.5,107.8],[107.8,108.1],[108.1,108.46],[108.46,108.7],[108.7,109.0],[109.0,109.54],[109.54,110.06],[110.06,110.82],[110.82,112.32],[112.32,112.64],[112.64,112.88],[112.88,113.06],[113.06,113.32],[113.32,113.56],[113.56,113.84],[113.84,114.42],[114.42,114.72],[114.72,115.1],[115.1,115.3],[115.3,115.96],[115.96,117.12],[117.12,117.58],[117.58,117.98],[118.14,118.3],[118.3,118.84],[118.84,119.18],[119.34,119.48],[119.48,120.14],[120.14,120.54],[120.54,121.82],[121.82,122.56],[122.56,123.18],[123.18,124.42],[124.42,124.72],[124.72,125.48],[126.44,126.74],[126.74,127.1],[127.1,127.72],[128.86,129.24],[129.24,129.42],[129.42,130.14],[130.14,130.92],[130.92,131.4],[131.4,132.12],[132.12,133.08],[133.08,133.94],[133.94,134.28],[134.28,135.14],[136.0,136.3],[136.3,136.66],[136.66,137.36],[138.46,138.66],[138.66,139.1],[139.1,139.74],[139.74,140.56],[140.56,141.06],[141.06,141.76],[141.76,142.76],[151.62,152.5],[152.5,153.38],[153.38,153.7],[153.7,154.22],[154.22,154.74],[154.74,154.9],[154.9,155.34],[155.34,156.28],[156.28,156.74],[156.74,157.14],[157.14,157.76],[157.76,158.36],[158.36,159.06],[159.06,160.08],[160.08,160.6],[160.6,160.94],[160.94,161.32],[161.32,163.02],[163.02,163.34],[163.34,163.72],[163.72,164.04],[164.04,164.26],[164.26,164.52],[164.52,164.96],[164.96,165.38],[165.38,165.8],[165.8,166.16],[166.16,166.56],[166.56,166.84],[166.84,167.32],[167.32,167.84],[167.84,168.12],[168.12,168.58],[168.58,169.04],[169.04,169.42],[169.42,169.88],[169.88,170.36],[170.36,170.54],[170.54,171.1],[171.88,172.62],[172.62,173.0],[173.0,173.58],[173.58,173.8],[173.8,174.06],[174.06,174.5],[174.5,174.76],[174.76,174.96],[174.96,175.28],[175.28,175.62],[175.62,175.92],[175.92,176.18],[176.18,176.46],[176.46,176.82],[176.82,177.4],[177.4,177.68],[177.68,178.1],[178.1,178.36],[178.36,178.56],[178.56,179.14],[179.14,179.62],[179.62,179.92],[179.92,181.28],[181.28,182.42],[182.42,183.04],[183.04,183.36],[183.36,183.64],[183.64,184.08],[184.08,184.28],[184.28,184.68],[184.68,184.9],[184.9,185.32],[185.32,185.66],[185.66,186.04],[186.04,186.4],[186.4,186.78],[186.78,187.06],[187.06,187.28],[187.28,187.62],[187.62,187.94],[187.94,188.16],[188.16,188.48],[188.48,189.08],[189.08,189.5],[189.5,190.1],[190.1,191.56],[191.56,191.92],[191.92,192.88],[193.62,193.98],[193.98,194.26],[194.26,194.92],[196.04,196.44],[196.44,196.68],[196.68,197.38],[197.38,198.14],[198.14,198.62],[198.62,199.3],[199.3,200.04],[200.04,201.24],[201.24,201.54],[201.54,202.16],[203.3,203.64],[203.64,203.92],[203.92,204.68],[205.66,206.08],[206.08,206.3],[206.3,206.92],[206.92,207.72],[207.72,208.24],[208.24,208.86],[208.86,210.24],[216.0,217.24],[217.24,217.88],[217.88,218.44],[218.44,220.06],[220.06,220.88],[222.0,223.94],[223.94,225.98],[225.98,226.92],[226.92,227.44],[227.44,228.0],[228.0,228.76]];
+const ENV = {fps: 30,
+  bass: "00MQUYVVUSPJOUVVVVTRSTUUQBFD9BDKNMKIEBJNVUTUVTRQQRQQINWWWVXVVUVVUQGKJKMNNMHIRSQPPONGNXWVVWTPPOOPJEIIFFJPFA6517BMWUTTVRNONNOKBOKKISPIDECEEDONKIIMQQIQPMKJKKKHMTRRPSQOONNNNEKONOQSPONNMNIHNLKLROLJKKKLGIKFGFLICCB9EGEPNKLOQPLQZabbbccaZfdcaXXXXXXXXSacbZadcddddedXbaYRYbaaZZaabegecaWWWVWWXZYabbbdcaVSSTTTTTTKIUTUUXVUVVWWNLWXXVYXTSSSTNNTTRTSUSSSSSSOLNLKJKNMLKKJIFLRQPPPQQHHVVUTSRRNOXVUTVSPONNOLAPNIHHLKFDDDCEDPPNMOQMKIHIHAPNKIKRNHEEEFKNRIEDCGCFHPNKKKJKKITSRSSTPOONOKELGEGHLCAAAB8DIOLMNRPMLLKKLDOSPOQTPONMNLGCIC6AEFIHJPONNMLJNNbaYabedcccdcXafdcbfeeddeddWVUSOOXZZhlaVZZXXPVfZZWRWSWWUVVVWWSQSVUTTRQMHSUTSTTROQRSSO9DA8DCILKJHD9ILTSRRTROOPQPPKOUTUTWSSSTTWSPKGKWROMHLgaSONLKDKVURSTQNMMMNHCGGDBGLC86536AJTRQQSOLMMMLHAMIHQVQHECEFBCOMKQUMOPHPVVJHMPJFLSQNQRPNMNRNMFKNMLPQOMQNLLHHPJJKQONNRNIJHGIEGHKGDCBMLGLQRUUROOJOYZZZZabZZfccaWXXXXWXXRbcbZadcdddeedXbZYRXaZaaiiabdfdcmjZXVWVWbddZZZadbWYdZURSTTLJSSTSVTUUVUUKLUWVXVVTRQQRMKQQPQPSPQQQQQMLNKIILTNJKNJJGKQOMQPOOFJTTSRRPQLNVTSRTQNMNMLIANLGFJKIEDBCACAMMLKMNKILOIGOOMILQPNGFOWLJMPIEEDFEEdgVLKIIIIHRQRPQSOMMNNJCLECGIIABEA86BJPKKLPOLKLKIKIOPONVVROOMMLFDHABKGBHGJNMLLJMKNNaZYabeccccdcXafdccfeedeeddXVTSOdmllmiZXbYWXSWhaeaSUXaZeaWXjijihdbZWXaWVSQSTTUSQRTTTPBFD9ACIMMKHEAJMVUTUVSQQfcbRMOVbcbbSUTSSSQUQKXTSNKHENOONNLNSUbYUSWTQNPUOKCHKWUWaSIMVICALTSQQTWWUddUIANOLGWZTMDAHEATYaZdhjgggdWTWWMMILSQPPRPNMMLMLDJNMNPROOMMMMHFMIKMRMLKZnfSKMJIEFKHBECAFTVVaYShfVIOWXXXZYZVbfeaYVadijZWVPZdcYbfbbedacaUYWXOUYWaVcYXYcdcZYVVTUVVWYZfccknlheccdZVQUSHGSSSTVUUUUUUMKVXWUXWSSRRSNMSSRRQUSRSdngXcbRKHKNLJIJIISYXZabWUNFDTSRQRPPPadXWRUPOMMOWK8MMKWaYbWYbQIDAMNLKKOLLJLHHAMLKVihXLIDDEUZcffhifgfdcdaWWXRROSRPQQSOMMNNJDKFDEHKCA9BA6BHNMMNQOLQehcRMRTVhmhVQNLKPUZfeaXLDHGFOPUefdaWPZYXYZdbbbccbWZecbbfddddddcWUUSMNWYXWVWXXXWXLSURUVSTRTSWVVVWWTh--vtroqonmmmlkkkkp--tqppmllmmmmmmmmmx-yrqonllkklmlv-yrolllllllkllllkklklp__rqonlkklmlmnllmr-_tqlonmlnmlmmmlmr__sqqmmkkkkmmo_-upkkkkkkkkllllllklko_-uqomllkjjjkkkkkoz-vrolkklkjkjjkklx_vrppnlkkkkls-_rnllllkllllllllllklnz-uomomlmmmmlljlko_-rmmnnlmmnmmmmmmmt-xppqonnmnnpoqz-unmlmowyqmmmmonoolmw-xqollkkllmmmlllo-zsronmmnnnnnnnnnnz-vrnmjiiijjln__uqklklkkkklkkllkllmlw-xsnnlkkkmmmnmnmn_-uqpnmlllmlllllllw-ypnmljkkkklnz_urmkkkklkkllllkkllllu-zspnlklklkkkjkkko_-tqopllkllkkkkllt-yqpljjjjijklz-vrmmmmnlmmnnmmmmmmmms_zrmomlklmllllmmmp__tsrpoooppppppppoz-usqnmnmmmlmlmllmmmmmlnlmnmnomnmmmmvyuojiYLQSVTSlyvXWTSScyyroYQRRQPPMHq_xplhWIJKKLNTvxvgSUUUTuyulTLJLLOOHOOlzxpmkfMOWXYYuysbTSSMZxyqmXRNMMQMJKhzzsnidPPRSROMWxxnVUOMayyrnWIFFHMNPIYxytnjfVKPSSTStyuhKMOPcxxojTVQLLQMLLezysnhfQHIJIGMjywnGNHBAqxtndMNJJMPNIezyrnjieYVcZZWZYYXfyysmhidbcedddeefemzxqnmheccccddgiilmokgefZbbYbdeZXccaWQPPQQPJLSSOPRQKJLQUOIDMNPNMNPSTPLKFJONNMONNQPNOSGHQOSbULLKLNOJGPPMPPQQPRNMPLLJKEKPNNNOKJMQJJBDMMLNNKJHIGHHCCOMMMQNJGLNGSQRNOOdYNHGHIF8JRQONNTWUWXOKKJJJ9ANJILJKIFIGEFGIKHHJNKGLTJMLNQKGIKLLNKIIPJJKJKKQKFGGGGLIHIHDFEFFHTVWWXXXWYdccbZbbcccccYacbYXbZZZZaaZYcbbXZZaZZZZZWZcbYindaWWVWWZXVVVZfgeszytpqonlomlkmmllmmllmmmllllmlllknklkkkkkkillllklkkkkjkjlkmlkklllllnmmmnoxvsqpllmnnmmlmonmmnnmllkllkklllljllllkkljkmnlkkkklmmlmmmlmmmnmnmlmmllmmowurqomlmmlllmmlllmnmlmlllllklllkmlllllllkjkmlllllllllnhkjnkkkllmmmmmllmpz_vtrrponpoppopoponnonmllnvytoptzqorxunwwqqqvvsqptrpspqppqyvrrmnnkknpoppyzuqqoljkljjkikkjkjlmlmllmmjmmllllllmmmnlnlmlonmlkmlmmllkmmmmmnmnlkjkkkoyxspoopmmnnmnmnmnnmmlkmnllmlkllmllkklmlmmloommlkkklkkkjlkkkkkklmnmoopppoxwtqollkkmklmmlmllkmmmmmmmmnmmmmmmmlmmmmmmlmnnmllmlllmnjklmllllmollpqmmlnmnppmommmmllmlmlmmmlknmnmnmnoqnmnnnpnnmmmoonnnnnmmmlmmnmnllkkooppmmoqqqywsqnnnmjnmmklnnmmmmjlnnonomnnnnmmllmmmmmkmnqonkllllklolkjjkmlnnmmmkmmkoxxtqnlmnliikllkjklllkklijjjkjjmnljjkkkkklkklllkjkllkklmmlllkkljklkloqqppwuoqpnmlkmmmmmnmmmmlllllllllllllknllmlmmnlklnoplllllllmoprppomnnnmnommlmZNNMUTXUTaYXZZdbbbccbWafbbbeddcddcdVYTTORZZYWWYYXYXXTSUSVWSWUVSWWTUVWVVl_-trppnmmlkjjkjjjq--urrommmmmmmmmmmq--urolmlklmmmu_wqolmmmsvtqnlkjjjjkkny_urmnokklllllklloy_srqommovpllllllpy-urookkkkkmmw-wqkkkkkswtppkkkkkjlkow_usonllkkkkkllllp_-snmmkkkkkkkjkklq__rppnkklkkkmv-xpllllltvuqmlkkkklllq__qnnmmntxqmrvnmpoywronommmmmmmmmmloy-trprrrtwtqrvyvvsropowxtqokmmmnmlmq__tpllllllmmmmmmlq_-spnqonnnnmmnnmlq--trqmjkjjkklu-xrkkkkktwspllllklllkoy_sppmmlklmlmmmmloy-vqopomqtollllkloz-tpnkkkkkkkmw-volklkkuwwrnkkjkkkkloy_spqollkkkjjjjkkoy-tpqpnllllkkllklny-rponjkjjjklw-xqmmmmntwwronlmmmlmlq_ywrponmlmkkkklllklllmnpoooooooopoommmmlmnnnnopqnpnmllilmllnlmnlnnlnmlmny_trqqokaWTTUSSSUiy_vsqronhZWVVUURRsz-usqnlmjaPcsw_wnnnmhTtyundJE9CIGDNoz-urqoqookaRQQNLIgz-vrrsqppmdQMKNMKhy-stppooolbQew_wommmlfsxulfMKJHIMDIiz_uspoomlmibTQOMLfx_urnomlmmmdPKGCGjz_vqponnmhUMMu_wolllkesxrlbGG6CDHDKiz_tqnpmllkeZWtyumrnllnvzwskdaaabbbjvy-qqpqokkkaUQUZXXYZZZdYbYVYVaWYYWXYYNFFHCBA48CHFBBFNIKGBDCA8778FLB8E8798CA302ADHGAAPNBGIKZPG62474ACE9J7124CWZKB1573417C62028A86686556ABD6AFH54318A2008BFGG8IA7411CQOGA343BNJHK5561ARKD78FA00BAB402788A55678778AC88C948FMDE7134378778CH738OOI36378BCFA796A776ROKJJIIG4IOJLKHFGGFFEFFFB5KMKKLLLI8AQNMLLIEBEBCGHEGCJghRJFFHG87CHD4796SZYI96D6004EDBA25407D20000000AKF39C44385111675556IRGIIETTD8DN854AL6FG1032KSH604AK40AC5003EHND986556E6847333222895018ELJAKTCD87CQVEEB69IUSSHA3G9339HA500302499931986FB78DD777EL8EG57AAMFF912446BDA999754AFD65466KKHB77DB766QOKHIIIG4IOJLKHFZtsxcDEEAipxoIIJIH5rzsmmssrssrqrryxqrtqmklmlmmnnmnpoppps-_ptriqqqnlmmmlkjmuvponmmkr-wntrnrlltupmmnllkjllmmmnllnmmllklklllmlmmlmr-ymlnsrrokkiiijkmoutpokmjjp-uqrrsqjjvuoknmmmlllkkswtqonnlllkkllllmmnmlmp-ytuttrrqmlkjjjllnuspnolkjp--pqomlmnttljjlkllllmmlnmllkkkklmmnnllllkkkmr-zttrttpqprlmmnooqwwrqpqnnr-xrrsooprwwppnnnmmnnootxustpnnlpuonoomnmmmlpqz_rsrqtolkjiiijllnvtpoiilkq_-oqpjjjnuuolmmkllllmnnnklklklmmmlmnljklllmnq-_rrsknkklklmllmkmutnomnmmq--tqnnklpssonklijjlkmmturoljiijlmnonlkkjjkmnr-ztrtnpmjjkmmmmnmnusqnnlmms-usnmllkmttolonmmmkkjjjkmmmmnnmnlkkklllmnnnns-vrqnnngLXJ00OT03XW800IOJ0KQE0WVB0GeeQLPMIOUQSXTYcWacYVXTLJLLLMPNNIB00FMRSTTTTQHNQUUUTSQQTTTQDHEF8CJKMKJNFILVUUSVTRQQPQPHMTTWXTSSRSUQNILLKJLNHHHQROOPPKEJUTUTTQNNKLOIFHJFDNPIECID8CMWTTSVPNNNNMKDKHHGRRLFHNGD9MHMGKMQOFQOKKIOMJKNSTTRTQPPNNOMILNNPPTQQQPNOJJPMKKRPKLJMMMIHGHIIRKCAFEDKJLQNNNQOJNXXYYaZZXWebaYWVVUWVUUOYZYXYaaabbbcmqslWOSWYdswpkjtxtspjikhuytojXcXWYbbYfyxttrpqoonmlmmmmmntwtpopmnnnooonnmmp_zvqrommmmmmmuywrniiklsvsomlkllkmlkmxxqqpmkkkllmmmmlmotvsqnnllmlmllmlllozyrrpmlllllkluyvmleghhtxvrokjkkjkmlozytqnljjkjkkkllklnswpmlnllmmljklklknwyqppollmmlmlvzwrmikkktvuolljkjjjjlksxvrqonnmoomononpnljnnmnnnnoooommoonnnnnnlnonnnnnnmmlllmmonmnmnnnoommnmq__tsonnllhZSPNMIKk__qsqrnookbVUUVVVl--urqpomfWPSjvzupnnmjcVVTSSXXXWVWURmy_tplppllhZSSWTPNfxztsooommldSLPMJLnz-tromlllkdTXv_vmlllliYNIFNMRMNQQNMp-zqoqommmkaTQUTURizztqopnnjZRLLOKJKnzzponmmmmjaMhx-qkllllhcoeGTlkPgxvQHn-yuronpnnibaYptZbrommmvunnsocauubaYryyrqnomlkdVUesvsnmmmleolcXindYnwcWRfyztsrpnmmhYUVYXXXgx_qrrqqpqmfXWXWTMey_vsrmnmlcSSVu_wnlkllhXSOKPQIHGJIMMk__vrprpmnldXWVURPn-_rqnmnnmgWPOOPPNjwysproomfUMPnx_usywmdSouiOYndPVuucnv-_qpmklmlfUNKPOMPj_-tpmllllhWHHJHDUtz_sqomkkjfWMmy_ngjlkjaZpeKSljKhyvLKkzwwqqrollfbYZprfbm-winssnnnoeewtccmu-ytppmmmlllmmuzuoijkjktqmmmponswommnnnoonooopopoooonnnnnnnnnnnmmmllkjjhiieVKHIJKKLKKKKKJIGFEFHIJKLLMMMMLJHFC99ABCDCA8426ACEEFEDCCBA8634689975200000003577764100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  mid: "00ThfbXWWWVTTVUVbggecbZXVUYVUUbdYYWXVVWVVTUTdbYXXWTVSUTRUReaXWWWUSSWUSSTTURbeZWUVUWVXZYZWfbYXWWURUXVWVbdYXWXVVSWYWXXhcZYYYWTUXVVVgZUVWYWTUZZXXYXSPVeZXWXZYYWYYWXaedaaYZYWTWVVVcgcbZZZYVWWUTQZXWVUVTSSYWWVXeZXWVWVTWXVUUURKMYaUSRQPQPUTRRQZWUTTTTVUTRSNWVRQQRPQRWXVVTebZYXYYWYYYVScdbZZYXWVWbYYaYVPNeicZZaYYWWWWURhgdcbaYWWYWXUbdYXVVVSTVTUVcgcbcaYYYYYWYUigdccbXXWXWUTTTUVSdgdbbZXXWWWTUQedaaaZXXXaYYVZeYXWXVUVVWTTRXdWVUVUSRXXWVZfaXWWXVUXZXYaaXTMZhdcbbaZaacbbaehfedccaacccZdgddedccdbbaaYbXWVWWUVUYWWWZhedccbbZabaabZROPeeaZZbaaZYWUURYXSRQRPQTbZYWacWWUUUSUYZYYVadahrsrhZYXXZjomnnnlmgholeVVXRRdkkfeUTSSlokkkkkkjljiighhieklgfikihhhhhiikjiklolkiWSPRYnpononiXlnmmeYdZQZnqmjihihimlkikhgfhnkihijjipmigejmjhjjihimkjjkjihiihjiljhhghhghnmljZccVSfjljkjaXUWhjjfccaZeoliTZXVVirssnZXWUgmlkhkmaYpnkjjlkkhjmljijfUSjkcXckkjiklfaWSPQOTTRRQYWUTSTTVUTRSOWWSRRSRSTadbbWecaisvpdYYXVfkoommkmnldnlibYUPbnrssqnibdilkiWffcdimkfWWUYkurojjokkjjjjkmmmnknlkjjeXWTnpnmljjiikihfaUTSSiqnlkjhfimkjbRaaXXbiihbYWWdolikmoopqpoopmiaTagjhhcWVVgllifdcYXcghijjjhaXovuvtpnkklpqkilnmmommllmmmegonfccaaabjkjjjjkkkkjidXVVahmkkjiiijjjhljnljikhedadbaaaaXURXWSQPQPQTbZYWacXXWWWYehgeYWdmlmpsokbXWVXmmiikljfipjZYipokjllgeabccbcdbcgjifeedaYYfcbagjedcbaZZcffffkhfgqsqljkiimmqonnmljgnqnjrsrqrtsssrqqkajppnmmheehjmkkjlgfmlecfmnlkkmlllplfejnmljkfbZinpqrqjXblnihkjijikifeeffecgigggkigfefdcbdccdgliihggfefhhhfjifdjmonkmllloqpoonnmeeniehmpolmnljigbVVjopmlmgpnpqmmmleYblgepqroommmmnmonljimmkkljijknliiijkinnijkhghfkmhfccZYYfifdcmjihggeddeddchlhfefedehjjijljghlrqomommlpqpnponnjdlmjjnpljmpnmnllmnmmlkinjhfgfklkmlmkjplehnolkjllllmommorqonpppnooolllklillgehmkggknkigggedggfddkljihggedfefdhnkjjjihgijjjhjggntyxutrqrpoqqnkhgjjpkkkqmmonqolkhgfecddZYXgebbbbZZadbaaegbZZaaYXbgdbahfbqxuqllnmkoyusqqpoopnqmlnnnltunmlkmlhhjjinprpmvwlilmonjnqnmllmllmwlkjooqmswtpoozqmovustsqqrrqwvxxvttsxunmnnnlmlnmmptonlwtmmmmljjprpnnpommwrjlppnlowvronuvnsvttvttsrqwxxxxvttryvlmmppomoonnotponuvjlllmlltwssstsrrxqrpkponnrqonxsjknrsqmklmlkmqpomoomovooponmklppoortrqvunnppoooqrrpopppooxtmoorrqwzyuqrsvlpwwuswwqqporpnonpoqzommljihilmlknuppvxmmmllkjjppkklnmmsxlmnopnmtysqotyonnwwutsrqpqpvwyyvtrvyqomnlonmmmlmmtqptxmmlkmllkprpnmnpmnyolkmnsssvurpqvpprwvtttssqovxxyxutstzrnmmnpnnmmmmmstqqxtllnnnnlqvuttttrqwrponpqnprrporxmklnsrolnommrrqqpqpolwqmnqopqqrqqqpttppvvnppppoorppoppomlrujmosqoquwssstssssqqqrsrrqqqqrpqpnnszpmnnnmmmonno_wqnnmmluwllmllkkkklkixqjjiinijqspnqznnmnpnmpzoonlllmijlmloyupqqpoopoooq-rqpooopvzpnnonnooommlvullpnmlmstqqptypmpmnmsxnmnnnnmppnopvyppprqpopppqr_rqpoonmwyonnnpoonpoomuwlmkomlkstqpnxvonoqpoo_snnnooonmmllvwnppqoomnponrrpppwxpoonmllmlkkkmllkwsmnnqonmmlkjiijjkpssttuuspkprpnnmknsrsrpqpibhlhhjfbbejopkhiijipqgckrsmlmonmmpnnlnkibZghdisyvutssolpmkcVUVadrplebaYaYijjibjcbjrqqqnonoomlklnqnopoonpnngaZjokgZeecasvsqpponposusrpgVbmstomnmmnnomkcgiffksrnjdYZZekmmkdZZZiopmloonfmnrjqqnihmolllkkmgknonkmomlmnjgebbbZbaaZWfcaZZaZaccZZWfhdcccabceccdakhgffgffgffebsvttrqrqqpuvttldchxyrpmmkcdprngfmigfr_zxvsplmnrnnpy_ysjiigfyzxtsqmklllljw-zxtmlmlpqrrdcdeexztrrpppklqmhcjkjhs-zwutqpmurkgj_-yolmlkm_-ytonljklicau--zvjdbckrolccdZYx_zxtrqonsrqonqonmt--ysolfctwvskyzkfstsss_-ysppmkjecYfv-_ysmmljljedkonmlxxmkjhhhhhgefcjliis-zxtqjYdrogcelsninujeiz-_wttqmloihhw--zwrplqyz_vvxwtmvvmkhgjjghjhihnpljr_ywsqmhdu-ufhyzvffhjiiy_xrossppqqnmt_zyvqrqikrmghtsqnvvqooomjhoqpnlromkszzwusqiku-qhmyzpmlqopnyzoqvusqrtrsrw-zxtsqijnpnlmnppnwwnmjlkjhkmkjjpomkr_xvrpjfejmkkkxvhijlkllxzxuyzxvokjiiq_zvuqifelmjglxzsmopoqp_-_yxsrmhmjjku-ywtmheirnklu_zuopnmmmxyxtrqqoonjghv-zxskjhgoqpqrtrnmvwqmlklkiklkkkqspot_ywsqnjgszohiwyofilllnyzstyyvsljhiht_zyvrrpijiffkvtoluuoqnpppovvutmoomlszywttrpltysioyysnnnlmnwzxquvutqkhhgr_xvsnmpopmfgloommwxqnjkjjjjkihgoolls_ywrqnkft-rlmxzqhhkkkjw_xuuxwumggfgqzyurspsrpnlmpsutqqqqqmljhfiigehrljhhjhggihfgklihikjgfiljggpljsyxsoopompyvvvvusrqptrnqoqooyunlmmlkllmlkntpmmwtlmmmlmkotonmnommwulllnqmrwwsmoypnpvussrysrrquwyyvusuyxnnonommmoonpspnmvvklnooonwuqoopnomvuikopnlowvroqyoqrvutuuxsrqvwxyxuuuuxvlnnponmonmllrqonwtllmmmlmsvtstvuspwtqropomotuspryljnqspnmuomjmompnoqprwvqpppnlpvqqruvtqovwrrqpopqrpoopqqrovumoorrquzwtqszqpqxxwuuyssstz_xwvuutxtlllkjjjmnmknuqomxtlmmllmllqpmlmnnmvtlmnpnnsywpmnxqlpwvtttzrsssvwxxvutryyononponnolnmrsqpwuknnopnmvurpnnponvulkmororwxsnpyoqtwuuvuxtrowxwxyvtsswumnoonnmnonomssrqxvmmomnnnqvvuuuusrzwprssqnosuporynllnsrpowroorrsrqqrqqxwrqsqqpqrqpprtspps_yywurqpw-sooxvonryroowtpowyxyxxrrt__yxtrsrqrsrsqrqppxvmnqqpqopnmlnrponxwnmmlkjjjkiiikkkkwullnnmllssppuzoolnqonozqoooplklnmnmywmqqprqpoppposrpqwvmmonnnnnponmnnmmvvjllmqnotuspszrqnpppnoxqpnoooooooooyvoqqrqqqqrrrqsssrxvmonnpoooonmmmmmlvulmnnnllrsqoqypppqsrrrzrprrqoqonlnnwvoqrrqpqppnopypposqonpzpnmnmllnnnnpwullmnlkmrusqqppqqqrqpmjjjjtttqghfebjsmjbYZYaimkiijofXdnmkklkkhmmbYbnollllkkkmqkfklkfZbdcZntonnmlkjjlhfVUTQZgqkefggghmmljkjnlhmmkkllliaglkiirmklmmkjjlmljbjjdYZYWWgpqmlllmlkoiWUbZWUjqnkgbbYcjmjihiqlmnlmllklmilpmlbVaYcprnmlnqnlllkjicXXcnmkiiiiilomkkkgighhjaaXWYWWXfZXWjfbbadaYYXXWXgbYXXbZaYYaXWVYmfeffgdcaYYhquurponmjhjlkjhhhgbppjeUURRYlkgXUhaSWgjiiiijikkeWVaghggihhgjokjkmkibbdcXgoomkfXXWfpmjXUTRYeqmhgjmnljnkiiioicgmkiijijkjlhfjkjihiighgikjfkiiaadaXdjmlkkkjhcepnmlkjiinqkkkllldfnmcXZmedmoomgYYXWioljbYaZenpmljlpkklljiihghgkljhhjkjgiliiihjhhiledaWaXXYfbaajgdgnwlcaabZgtsdaadccapkedmrnkkpvonoqecivz-yyxuwtjmrohbZbcutptrppnlnpponopqrwyxwsljjlvtqsuvvvvzyyzzxwvrttttspnmlosppqrqqpwwsqqpmmnusoqprrrqqrrqopolktzuqmllkkvvrrtwwwvwzyyxvrrquwupnuplikprrqqrqprspkhjkjlwwrqpnlnmsutrqstrqyywsmljjlvvnpqwrqmtyxxyyxusruvtrqqqqtvutqpnmloutsqrsrqwrlnnnnlkkkiggjlkgpsnllkkjjurlmlmnlirxvvvvustpsrqnunqstuuqsystppqqqoqpnmxupspmlkggqrrqqqqptutrssrljtulmswttuyyvwwvvtposturopqprusrrttroprrqrqqrqyvvvuooooqssrqssstuwqrqrrslwunqquurpuyyxwvssontsrrwsrsuvwwyxxqlntutnklkjuwvxwxwsnosrmjjnopwxvtplkijvxvqjlnnnyzyyxsqqqsvttoqroquvvurooptpllkkprrovrmjgdaZQPrhEQqpFAntQ8Fpte5jun4ltf09tzxwwwurvzwsppnnlqyutrpmmlmkohejikkstrnlkmlklmpnlpsqoopommlnnnlntqnnnopmmmlllpspuzxrrqqrpsywtrrrqrsrwxzzwvvtuutoopppnnqrrrurqpoponopnmnrsqpoqomloonnqronsywsprrttuyvvvtsqrouyxyxwtsrtpooorqpnpspqqsqpqqpnmlmmmmtwtttustqsrrrnonnpuurqspoonrtqnmmmkkprpppqprsrtqoppmkoqoqqstsqppqrrrpqqprrppqqqqruxpoorqrvzwtqtyrrrz--zxytsrsz_xxwuutwwrqoonmmpqppqwttsy-_ytrppoorqoqqsqovvpporqotywsqszusqy--yxzuttswvxxwutuxxrrprssprsssrtussy-_xutrrqqtsqqrrrpwvpnoptstwvursyttu_--zyzusrwxxxwwvuuxvqrqrrqpqsrrrtuttz-_xusrqprwvvuuustyxrsqqqnottrrsyqqow--xuwrqpssttutttrtzssrssrsssqrstspqt--zwwtpqtrqqr--zsqrqpq--_wxwvsrtuttw--zwsrrrsttsrsrrpxwrqqrsttsrqsrtstsxuprssqpqrstrsrsrputnqqqtsswywuvysttutsrpqrqpstsqqqsttzxpsssttstutrrwuuvzxrstttsrsttrrrsssywpqstttsywttv_qutvuttqrsrrtuutstttryvrrtsststtttsvtttyvrrrrrsstwvuvvtutyvqpqutsstwvvwzrpruuspnvwsmsuutsuvssxvsttutrsrtsuv-vstusrru_vrrtttttvtutzvqssvuuwzywww-wvuuuuttwwtstvttturqqwxqrrtsrqssstsvuttywqsrrrrrstsrrrrrqxwprrpqqqvyvuuzrtsuwtustttsstvuttssqxwrrsuttsttsssutsrzuqqqsttrrssrrpqqqzxrqsuvtuxyxvxysttsxsqrzvtqruuttrrrqwvqqstttstuuutvxvuyvqqssttttwuvwvtttxvqststrttvwtvzsqrsutqowytpuuusttvrqvwwtvuuvuvvtuv-vuuxtttw_vssrqsruussswspppttstzywuu-uuwwwxyyxvssttuurvtsrokjjhiggffdcbaaYXYWTTTTUVTTUUTTSTRQPOKJJJKKLKKJIHHHGGGFFEDDDEDDCBBAA98876544344334421000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  treb: "00ENLIDA97666653HLICB976459632IJDA7665455225LID98767688547OKEA9764675321145IRLGDBCA68864BQNIFCB98AC873JMIGDA986AA86ARQJC9CA78A86BTSHC9AB57AB77A763DLEA86855455219IIB9765457641DGDA7542243107GFC8555334200CLFB86632452103207FIEB8776665431FFA8655775320GKFCA8878A5423JIEB999AD89A3KMHECCC85BGC8EED62VWPHBCC8679747MIDB865568446HLIDB97559748HMHEA888767445NOIDAA866A95432458MOJGCBA8789757ONHFDC977A874JOHGCA98899852KRMGC99868843IQRE99886AAAD99753HMFCB897536434IJC9763335432HIB99864854337HC97664336531FLGCA8754685443118IIE97554885101FIDA7666A8310CIHC96CNVcfdaXUNUkpqpnmonimtrqrrssplnopy---_vnnpoiLHEUljihccaaaklkkjijijjfYZdgddcdddedeeecippojnz_zwpppopoiYopophdojRXinkaZZYYckifdeeffgiliaZZYajkhcWcedbZZZZaaaaeiihffcaYbkjjjdYXVhqpohYloiSghccjy---zsjhkijfhsppmVr__zuponfKFCWkhghiicKcoonlmnmldfghihfppdmhWRUeiihgeaSMHE9665421FFC8755875345JLIMQSUYckonjbUYddnqnWLKHSooopqsrsrpnonoqnbHltqpqrqgWajnnlXhxzywrqoZLJaemndXZjnnnnmmmomlfYgllnliVEVqrpngWXXXimmqz--_zriebaXWXdjms_----_vnnmhZKOjqnmmnnpnmmmlmnkUToniedYNLOmlonlliabmrstuvuricnnnmnmicchjkfbaZXZilmmmmlkfokoz-----_ojjjkjkefijigVOYtrpnmlkkjclmllnnigfecYSOLIDFKMICAHIDA7666A827ELPRRRTYhorphVTVZabhmox--yfZnpnnnliXaimutohiihhcaVSRTSRSQKGORMHGGECBDKFCCMOHFDCGMYjoqpkaYQwwmidcYTTVdlkjhhfgbglnkoqrsssrrqqqqiTnpppnhXRu-tiebcbTmqy_-ypkhggfggfgilmrrppopy__vqppnkdQmojgknmjigeaWTRNLIGKHDBIMKEDDDBBCJFCBJRSWadfiloqrrpniZdstttpdZYbmomlkjijlonez-unjiijjkkixujprrtsncqrrrqqrpgx-tggomnnnnnnoonnpporssppomhZiopppngZamlpqokgffecXSOMKHFLJGCHRMHFEFDCDLIHLVabeghjkmpstsqnicbkllkdabbbdmmljihhhnmfaagqsrrqqqpqqqiiqrqplcz---sifffcbiljktrqpqqqpooopojkrqpoopsstsqqppomjleZYbhhhgfdaVRNNLLPPMKLPMGEFFBCDKHFDNOHFGILPZioqplgaaprrrqqrqrttqoprqpkljabcklkiijiebabbYVSPLGFPMIGEGFCEKHFCMPLJHGFDDJKFDHQPNjpnokikkciswttussstswwxyxwvtqpkhgfeZXYYXZgheblnljgeecWcdYUTTUUUbomkhhjhcnrpkjjomklsttutpnonqsqqponllnomhfdcWUVTSRWhecbmnljgfebWgcWTUTRRSnolihgeYfppllnppnqurprrqqnotrprqoonnqolifdccWTVVTVefdelprvvwsgmupnonnmkinmmideejurojfmmmkpmlqwyzyxzullmmmmllomljhebWlpmlklonnnpnnmmlkjlllllkjjjjnnmkjlkhlooolkmpllqtsrsrqsspuuwxwvuttqmigeebYXWVUYjfdknmigeeaVUZcZVTTUSgpmjgecVUnrqlkmomjksttutpoporsqppnnmmoomfecaWUTUTSUfecioljgedZVWfbXUSTVTXnmkhfeheiookknoolpurpqrqqnorqqsqnmmmpmkheedbZaYVUWfighnonx_-xkmtqpqommlhmmmjeefYqupmhiomloporx_-__zqlmnnnmmkoomlifdacfgfffhkjjlnmkjjhghjkjihhhgglpmkijgdfpqoljjhhghihggggghhefeedccfosrqppppnnnmmmqpmihhhgkonkieeeddedcbmomjgedZbppmjinnkgfeffhnmkhbcfcabbcemsrrqqppooonnnrpomkkjjmpnlkhgghhhffekonkihecepqmkijonjhigfjnmlifedeedbbjqsrrqqppoooonnqqomllkjnomkiggffffddcjomjhhfacopnjjmnmihhfdeomkigeddecaZeprppononnmllkkkihhknmkihhfcccbaabbbcmoljikjlprrnhaTUVXjqsrqqpoidfloonjbZirppppnaLmssspYRLtxusrrqngbfjWQstttsrrqonnoqmmokXeoqjkomnnnmlgchksyoai_-upz-----_qedZPWPXooqrsqpnmlnoiepsrsqonnnnmaPWlrqgbnneahihgfedecflmkjhTMLajkgddccchnmlcbVOUehilv-xZx-sghfSJGbuuurromkjghhmppnabnooppoolilppoooprromjfZSPNLOOGA8MLGECAABFB785NRNLKJLOTXZbcdfffhjknonhVLbmiigggggelpoolaOVgjooppqwulqluyyywuwvstqmicTVhjikmrvtplmlery_ypjegggggijpuurojjjZglhiWefUTmqomnmlichkqwxxxxyxtvuqlebYiiUPhsvtonmlmotvsnjjmolqwwwsvvsqeMJkqppvvwvvwwnigefeddbbdigcaYaktusnidWUbhjgeqthllihhiputokhfjjcbOjquusnjkdgldLYmpmkknolhebbbbcddccdeedkturnjcKWsmaTaiokosvkYisvuqsnowyyskgqvwtrshcfuvwwtpnkhlnlifdddddedcceeddkstrnjcTEnulKWpusehoqpjqurpzvoghgfeclttqngecYdmjbmsqrrqqqponkflqpooomheuzxtrnjefswzzywttliihgfhrunfjkmmmmooopuuqkjfbgmjilmlkjhmnjgeccccccccdfgedjrtqmhVJKPTSUaooeimpppoqusppoormelv__wustzxpsvpiy-wtqnmlkgfrvuqpnmhZcn__xuuw_ztlppjegkqvsqpppqpsutsrqjjmhZpzyvtrxxsimrqommnlklnnkhecddddedddeeddjrtqmhcYHksiKXptmfmprrrstoqqqrx_--__yttqnlljsxzvlpsrrsssrrqpppmoooox_-_-zvtqollljmrkeqsurrqqqooquuoqonnx____wusqmklmknkdjqnkjjnnkheccccddccdggedjstqmicUJltjKWotlPdknmlotsqpqrsy_---_xuqnllklmlhmrpmlkjjjjhdaYXXWUSTbWUSQPOMLNMJKOQMKJIGEFLLGDSgZXjpnokjllbirvtstssttrwwyyywvturmjigffccccbejjgflnmjhfgfcgjdaababbknmigffamrqnlmpmjmsutuusppnqsqqpoonmoqnigeeeaZaZZafigekomjgffeaonfaaaaaaknkihgebhpqmmpqompusqrrsroqurqqpnonnopligeebZZaZZadgfelorwxxvstxsqpoonnlnoolkidjusponnonlqonrx__yzzunlllmmmlnomlifdcnupoooqnnooponmmnnnnnmonmmnknonmllkjmtqpmmqolkrvtstutsrtyyyyxvvutsnjhgffdcccbcjjgflomjgefeaagfcaabaaknlhgecZnrqmllpmkmsttvvsqrpstqqpoommnpoigffebabaaZcfgfkomihffebpmgdaaaaajnliffhchoolloqonpuspqrrroorqpponnmnooliggfgdcbaaagihilonx--ysrvqpqoonnknpomkjgbqupnmmonloqmsy--zz_smklmnmlknnonlhedfikjjjllkklrtromjijqtnllrqjjmslhiqnhiqsrrqojjjotspjggghfefffeddfqsqpoooonnnmmmmmkjmpnljihfeeeeddeedblomjgfdYaopnkjomkhhhghgnnkjhgcbbccdenrqrqpppoonnmmnnmmopnmlkjihghhhhhgfelomkhfeceoqnjjolkigfgggnnljfcedeecbiqsrrqppponnnnnnnnmoqonlkiffgggfffedcknmjgedbdpqliinmlhhiffgomljgcddddeefprpppnnmmmllkkoomjgfggionlkjjjkklnoqrrpniheYZfmoibZabanrqr_-zjqurrkYYZYalkigZUUSpuphZYaeelpkjihhgfcdjqqqiggjkkkjjkmjmllicZikeZiiihgggiidkoy__wgagnpnnoooooomlkjjgabdgihhgqxvhaXZfefgiiiihiihiokgZv_zsaoolhhihjhknjnz__xhababZOKIsuohWUWhffmmnllkjfZcfhfVHJMTaeefhikkghihhgXNLbjfddbYXYahkmmjfecaZZTOJIIFDIRICBaWRPNNLJJIIFJSNJGEKFFGMUYYacmllmoonnkeXjnnpppqqqqopojbXXWkyxpqz_zqXmmoy_z___ylddbcddYgo_--zrmnnnnnnnomjikjhZcjhRYkmliZNHZspnx_-__zwgddccaaZXdddedgfnpljjiihbjlkhgmnonmnmnnlllkijkgVchdSjonljhfgqwvnlljXWXYjmnnmmlifljilqqopspllieVUMZsnhiqsrptljklmmolmlhfbYVTTUafedeehfkkedfhihffecYWSRSMMRVVUWcbWWfriZaaaWaqpbYZZaXWtohfkommoqsrrrthfeuwvvuttrnflpswxxwxxppokkiefvvtsrsuuuutoowxuniqorqqrqpprvwxxwuspqrqssplljrrpojgfbqupkgggimpspuuutpmhdhrtssnbXiqrvxxuleppssrponnorvwxxwusqpojjnorvwutogghfirrrnacdZmvpqpnlhdprokjikigerssqqxwxwtppqoohbZquxyyyzxwvvspllmlejrrrrogahqsofeosqpolonmpqqpqstrmjgcagmjecedXQjjpomkdXUhrwxxxxvusqokknnmlprtvuurqjlsrsttsplrprtxyzyyxslkighggjooppnhsywpostwronrvvxwwusonrqpommmljmljhlkkopsrrrpomhnmppolhdouspqqrstrpsrsrsrpinlooqqmhiouwwxxwtyyvpmmponkkponnooigrtsuwwwxxvopoooohlvuvyzywuqttrpideZersvxywsddsvwxwwtqrvurommnmmnpppmfforsxytkloqoompnljgbUTkfObrkOMhqbIUuufFlwrNovmCHlvxyyxwtsroolklnjmsvtsttsttqwxyzxvvuusmijijggghjiklkigfeaaaaZXXZjeYYYXXWWVUTSXcXosqnllllfltuuvurppostqqponllknndbbaYXaeccbggdcabcYYYYXWgeZXXWVUUUUUTaaWWhqplknnljovtprrqrootrqrqonmnphecbcZWWZdccbegefebrwxyvstwrpooonmkknnljhbiusroonliiqpnrx___zzumlllmmlkkmkkgcYbmpoopppooooonnnnoppoonnnmmmlnqkkkkkjlspomnqpllrwxutussruyyyywvustrnkkjjihgijjkmkjhnuvsnjhfeejiggikhfjnlihfeboqpmlmoolmtxxwurppnqrpppopnmoqokigggeegffegigfmuvsokhgeihffejkifkomjhgigjqollnqonouvwusrropsqpppopononnjihgfdegefehjhinuvy__ytswrqqpppnkmppnmlgcrvronnoonqsvxz-_yzzsnnonnonnnponlhffgikkkkllkkmtvurokijklllluvsljjiijrvuprpollkkkmotvsoiijjghgfgfgfekqqpqpooonnmnmnlkknonmljkjiiggfeddcbknlihggdjsqmllomkjiiihhihgffgeeffefforqqpoponnmmmlmllknpnlkkjihhhgggfffeknljiihfkspnlkomlkkjjighhijighfeddehopqpppnnmnmlkkjjjknopx_-yuuxqppponmkmonnmkgdqtomlmoggoqoty--zzzsonnnpnnmoqrponlllllkkmomkkjjkkmpljklkjjnkijjnpnlklkilspnkkomljijjjikkjijjffilddcosrqqpoonnnmmlnllknqnmlkkkjihhhgfeeelolkiggdjspmkkonljkihhgghhiiggfffeedpqqqpppoononnnnnmlponmljjjjihhggfffemoljihheksqnlkmlkmnlhggnlhgijfeeljegopqqpppooonnmmmmmmppox_-zuuwqppppomlnpponlhervqmmmohipqotz--zzzsnnnoqnllorsqqonmmnnomnpnmlmkjklokkkmlllpmjkknnnkllkilrqmlmolmmoprrrmkhggigfjmedcWQONKJJHGDCBA989887544432211112111111111221111111111111210111111111111111101100000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  onset: "009uI21033423215BT700364545609CZ2023C069321FES1027A1I3610JDX0035C54A40045CI6OC00284538419KT1023D4374188X5024B159D318NV0038E435418Nb2017H43EA308D732PG000650C2412DJH203363479056T60139155B127JI1014739A6048QE0026748C301C921RR50125173A2158P201476C43174V5012818B8126BU101395AI3733T30117138L704L7403s5001I3524573DU0014A538319DO7004A914418MF700741D6112IDY2024806DA10259J88N51114165521CEU1024A2389156Z9011B33974185aB002F435F128WI1015944G42898313VB00183667419DN30046746608AP2034718D110FJD004751B59159QA0035544B404A615PR3004813B5205CP4024838G4124QA00174CXL6243E4InUA431224oX73BA6484EA9F4AE4DHC623022fv6638412Lc443466PIH203b813A732ABJ6FHWH365DE3GfU7466724hC7B28S51SfF201363aQ55AI425OSE4258ATb42A7I5449644HM6GKA542577IQP4346733pU7442YA18ZD35cU532DL5AB431GjG353sC29cG846003im625DJ80do53578362EF544KQ49f411WYB6DH72112174B2177O201387D32185S405BA7EKQ93328C8iYC20016MwD7A885667AA974330-Y9B85431FRGFB1PH8QJ844014mdX411DU865536C848D5NB8BF401f-7244364CZA7LF5A7DR921133DeNFLD2D11COC57431C-L22LC7877346A8715zH218312L-C732453KeL9677521AlF8652327NPF67421OZ7657A4C5WBCE4526FGE94DA49AE84A520ZsG611456B8N85HH7458E4113703BB6049M4024A49G4125RC4449HQOD2027RE5AWH9M6123Yq61CD431RPEC8UA459A41127B38G326T80048534HF02AS4012738cZF645810-R7226414DZQ6532448YQC9RA567744454822o935AE12_M7228C87mJC34NE414B534BL77IK6337KD28YHA95631sQ53HF5346F21534233K206KB11236349D135RC587AA9EFA555610MjC465302FeE4376799JD1bCF833E6246KP1JW9455D1a99326472WNG1JWDE566666489846GA24D8543YC454A43HkDA983445M41117334O323NL0014922BA12EaE457AB6CF9754500TcC7426447RN7236388PD223cN73E73234774CH564H5Z97A535A45DPE2IO85238A259C835MP723B6CAC5324667DK315SL548D62004229F413LI101652499146X600374ARQJ54480DoNB44555A86415556GSC14La6488F52389613C305DS2023636DB016X7013322AK301HM24-K6722A34hV723D749BBC59B56AY810138204857OH603-B1243623V81045735jm214D621kJ513Ld31LN4454447FMM985548CR812343127324VL01B-71245318U4009722F-603F211dV736FU92JF2398548DRA6A6445BY512363218216MM12AsD473451SU3276723JT4415F2RSC108v614I73FA58338K6267853RL3223532kF215M934X91223325O81264752Ci6023F13WE5523OF1HO824MA3678E797358OM20223314F215WP02xF11233137U8016G44xR2224508vJ515fH21PP5453469DML995459MK511333126625GR10qM2222421IR5012CA1cs3025BG5DJ657PI42KJ3388865COB896535EV301464127714HS659h72C6333DXA2327636Y8233C51sD223UR21CC8C75C429G5587526Ac41235419E5458S827V9123324CL71375426jD137C02NX62137346974697436A5433448QZK21344325745Gl5023559pF12332225A54Py5012870Oi936QU2117B55YX22107731GBHGWZ61332324545KR2222447dD124523444446oB15A102Lc8134UL218536hI2222336B63FaVE14242224347La313144ApA022433539246vE123C11Me824Bf6018842Vk31223453954cq915343324533B4127iB042341285136726Io6025D25885124386AiNA8475333DNA2642EWL7656712rC3AK00B-O952272B8dA16-I6435759585B77721acA1RQB5436744JES901nrHD2G427299J53AEE0LyHB653537BB52DWC559634D9B10SsJ32AY83Gd8334A39GLOE52822NfP71285HFHB2E5H10DcQEFJ804pL8468302tvA425E48A7OPKF5319V74D24DG9HE579777DE61311163F3159U201394ED21A4Z601292BMD66B9J2269A775131ej646368BCML867229emF344CD29Q3J59D22CkJ4211007hI8EPaB200189ynA212152476EQsN321128CYK991G77C-D1253462JBF75I427mK5221126W511-n910133Fhh92205647R92RwM412001mUB7G2652G-6333432587BFCB11L_X6111104oG68Bo806N459MdD2111196832-fI521146DG30Wl935Dg7001225765264J625rT421100cv100RWR6APD00gpD21656FP901HsJ422402dvC6226311W910227557815BF524qS5211004-P00c-D104NA5HjC12EB406C33B-Q4210232YT10oQ424b6122442MK4248L11eaF41121FZfH12SW4004727cl914O7458A8A6NI410330TP83AB8457c50115443D526BM215lS5211008Q703qu309KC46HUA33B68811KPIaG227900EN43cQN500843ASnD2141202FUNGZC257201cF00KYVD105534NaC321124B53eVbD238102ON637H9638U60022634B516AH415kS4211003-P00d_C00ODA7HQ80CH99C7545FaE32116AIB408hJ335X7231386DN859JB424YG312223CaL01hR6116434QeF30B869J934CeH21126F9D10PUC549Z60113445A623BM217oT4111103-O00gwC10PTB6CgH228888A554FgG3113488832OI8932A55634236B312NL10167139810IK5017311BF412eT11sK7822932fW734A747ABF58A447IW311445123448QI21Dw81225534RB014B65EuA113A73eLB32MQ20PL534IM335FKA94469GQA01433426544JM50DlB1244338p4105664Au914C314UW744NP13IH33AFI259HA685536ET712443237445DM628m9683422ISA2245346V734491QT9822IN22G94CAEN124B52667948R7124316mN125GB224S61124655F32468545X7225862ON331EL21ERA33BL327RI7443457D41223334C444MR11Dt91223454AO3129A6Bx9124517jN722MS20PM646HK348DH984439FVA102363156466L828jB1322426p2401695AtA1169B1NS945OP22KF238DJ567J87A4547CR702535415715CP73AZ92C8212ANE3425644Z8243641fM405MP20DB7E9DM12467459833BW7334333ADA44CD313NV6312117mF00Fb402XQ00Na20FeA354203HcC310153376634636Pg812445325247BC32DkA142121354237B35Hz7132311Rf71AJN212D755Ka312651159AJLmA264363224433922BY81563442442324637oA154792GW621NQ2224784DV41035726648ee7142334236336B52Aa9143442256223523Cu9122751LX601NT2129825LW22421544998Qm916333243434KW3148357MU2143346859DJI2135611CQJ642376AWC49F532IO6521536DbA331346qK6214FR98O9425757BGME2LF44968456LD47D3838WC38f923854BBAGFL423ARfO425L56EMC316CG43ACD866AM9OB35XL44ADA346K65ECC45cD40J-I42375ADJ82ENP32AcG965F16-H3303dX2GJ593469E7HJ6524B4ZaG35CRA55766AG103-U6234EE7PM94886528IA101G924KQ11Ho1015J1023A2VU0017I1616M865Ud4279822129tWB74696622F864369fXK38D221B-L9I34Z12UI5136BF8PYJ33I7239D455UE289D761SL70ZaB38101Z-G2G345DKPF235JM645P424UV7EE53225D9K9B4AL9323CB565P76DA691RI22yT93327EM9GJ635725CpG515G765NC3DBPQ19S5763011j-92GF367SG89AAQ918F7355526AgJ3279A6IA348FC527MC2117626GH438P10OfR113468ih2046844G-116cF334LB237A01S-D53433320IBB9369Ei4652642EW8324DA66T937C213Hc675AB837LD6643322986844247ME224F55hL4116C9CHX396664213QM65E612xO676331Cq984BA664EKB64322377329Q6699F823E83LK5101E84fg4342835QE6233GC2DmA328923IX524CD11AxMB645513394256723SO534D32RVE204YA28Y5744E5224D525IA21mF0127415-9A327511-VD54341224327O437JD84BK121AF466B62Fa58C85421DI7239845aG45742HBe649N9129YH35352316E7542565AF205N67CH93545449g6B52123VG5255DB75PA2347665a4A6AC208kL735531748549N324KN9586618O96D52979fBB54752HQ9642CG77R7121320VwB752763FvC7533229C7434743COB52269NF68338LE55S59222110c-00--301-K00z-A00-U00-M00U-S745332B83633796RP732763DFBF68944Jf84128A526FD76M8127853467476IQ113974235346PB3iK5124753gO5457446FJI976534ABD914B423GGA98E1156B528735AR514663148526O512lO444A655MM32A98588QC598623AK1335A323HE589C44854Z95735FP62455252A9765E2UU9423761CRB5C85653CM73447652CF21482EbD36696234443458685C5256646DJ5046A37QQ332HJ12DSK5249347QI7444346F50335534E853EE238gL42111347G435FA13XA034615dH512IR31HVH4337128DHA97855AM9125654299776D62AlN5112113E6238J823XA1159A6EH365JN32ERI4339328H76A88558J624455319A458F739eN3532118HB235A624R9233742jH324GN23BRJ6537153866768833EK222435AE8268B625RS6312115I536Nb6201314OjC2193214566ENO6310255784266548gC254444222366B22Be81533435575234347nA134762RO916JI22268524A434D9137958Gi9153564334337C227V91354444572343638f8158434MP313GM232865336466B6613578MZ5355334343434955BU84C65546B63474449S7255822ZD623JI12SC4C74W323EB43AF513WC33342289536LL1159345RG018C425J714DV5125A23RJ224GK22248554F513G716HG12EpE133634262546C229eA1334445854335357mA242233SR712GP32295333865656633668FhC444543334544A339d6143464446524354Bn7028752QM617GF338CC01Fa203GB32AM64HW5445644355236B557T72E56626C62365459N7344443aC744FI15M96B77V513E873DC615ZG51424467653EL123G326LD0189557I514CL4137B22IN201FO33988F565111EC33GJ135302434242223227224113554322423224121422434423321113234212243121221112121111111111210110000111111001010001000000100000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"};
+
+
+// ===== envelopes (30 fps, 6-bit) =====
+const ALPH = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-';
+const LUT = {};
+for (let i = 0; i < 64; i++) LUT[ALPH[i]] = i / 63;
+const decode = s => { const a = new Float32Array(s.length); for (let i = 0; i < s.length; i++) a[i] = LUT[s[i]]; return a; };
+const BASS = decode(ENV.bass), MID = decode(ENV.mid), TREB = decode(ENV.treb), ONSET = decode(ENV.onset);
+function env(arr, t) {
+  const f = t * ENV.fps, i = Math.floor(f);
+  if (i <= 0) return arr[0];
+  if (i >= arr.length - 1) return arr[arr.length - 1];
+  const k = f - i;
+  return arr[i] * (1 - k) + arr[i + 1] * k;
+}
+
+// ===== small math =====
+const clamp = (v, a = 0, b = 1) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, k) => a + (b - a) * k;
+const smooth = (a, b, v) => { const k = clamp((v - a) / (b - a)); return k * k * (3 - 2 * k); };
+const after = (t, t0, d) => t < t0 ? 0 : Math.exp(-(t - t0) / d);             // instant attack, exp decay
+const swell = (t, t0, atk, d) => t < t0 ? 0 : t - t0 < atk ? (t - t0) / atk : Math.exp(-(t - t0 - atk) / d);
+const lerpHue = (a, b, k) => a + ((((b - a) % 360) + 540) % 360 - 180) * k;
+const TAU = Math.PI * 2;
+let seed = 20261030;
+const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+const PERM = new Uint8Array(512);
+{
+  const p = [...Array(256).keys()];
+  for (let i = 255; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
+  for (let i = 0; i < 512; i++) PERM[i] = p[i & 255];
+}
+const GRAD = new Float32Array(256).map(() => rnd() * 2 - 1);
+function noise2(x, y) {
+  const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+  const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+  const h = (a, b) => GRAD[PERM[(PERM[a & 255] + b) & 255]];
+  return lerp(lerp(h(xi, yi), h(xi + 1, yi), u), lerp(h(xi, yi + 1), h(xi + 1, yi + 1), u), v);
+}
+const hsl = (h, s, l, a = 1) => `hsla(${(((h % 360) + 360) % 360).toFixed(1)},${s.toFixed(1)}%,${l.toFixed(1)}%,${clamp(a).toFixed(3)})`;
+const rgb = c => `rgb(${c[0] | 0},${c[1] | 0},${c[2] | 0})`;
+
+// piecewise keyframes [[t, v], ...] with eased segments
+function track(K, t) {
+  if (t <= K[0][0]) return K[0][1];
+  for (let i = 1; i < K.length; i++) {
+    if (t < K[i][0]) { const a = K[i - 1], b = K[i]; return lerp(a[1], b[1], smooth(a[0], b[0], t)); }
+  }
+  return K[K.length - 1][1];
+}
+const lowerBound = (arr, t) => { let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m][0] < t) lo = m + 1; else hi = m; } return lo; };
+
+// ===== beat clock =====
+function beatAt(t) {
+  if (t < BEATS[0]) return { i: -1, since: 9, len: 0.6, down: false, acc: 0 };
+  let lo = 0, hi = BEATS.length - 1;
+  while (lo < hi) { const m = (lo + hi + 1) >> 1; if (BEATS[m] <= t) lo = m; else hi = m - 1; }
+  const len = lo + 1 < BEATS.length ? BEATS[lo + 1] - BEATS[lo] : 0.6;
+  return { i: lo, since: t - BEATS[lo], len, down: (lo & 3) === 0, acc: ACCENT[lo] };
+}
+// pull a lyric cue onto the beat grid (half-beats) when it is already close to it
+function snap(t) {
+  const b = beatAt(t);
+  if (b.i < 0) return t;
+  let best = t, bd = 0.12;
+  for (const g of [BEATS[b.i], BEATS[b.i] + b.len / 2, BEATS[b.i] + b.len]) if (Math.abs(g - t) < bd) { bd = Math.abs(g - t); best = g; }
+  return best;
+}
+const BT = i => BEATS[Math.min(i, BEATS.length - 1)];
+const SEC = { v1: BT(28), ch1: BT(92), in1: BT(124), v2: BT(140), ch2: BT(204), in2: BT(236), v3: BT(252), house: BT(284), ch3: BT(316), outro: BT(348) };
+
+// ===== page, canvas, audio =====
+document.title = TITLE;
+const css = document.createElement('style');
+css.textContent = 'html,body{margin:0;height:100%;background:#020207;overflow:hidden}canvas{display:block;width:100vw;height:100vh;cursor:pointer}';
+document.head.appendChild(css);
+
+const cv = document.createElement('canvas');
+document.body.appendChild(cv);
+const ctx = cv.getContext('2d');
+const mk = () => { const c = document.createElement('canvas'); return [c, c.getContext('2d')]; };
+const [scene, sx] = mk();     // the frame, redrawn from scratch
+const [trail, tx] = mk();     // particles, fades slowly (motion streaks)
+const [g1, g1x] = mk();       // 1/4 res bloom
+const [g2, g2x] = mk();       // 1/16 res bloom
+const [vig, vx] = mk();       // vignette
+const [grain, grx] = mk();    // film grain tile
+grain.width = grain.height = 256;
+{
+  const img = grx.createImageData(256, 256);
+  for (let i = 0; i < img.data.length; i += 4) { const v = rnd() * 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+  grx.putImageData(img, 0, 0);
+}
+const grainPat = ctx.createPattern(grain, 'repeat');
+
+let W = 0, H = 0, DPR = 1, S = 1, CX = 0, CY = 0;
+function resize() {
+  const cw = innerWidth, ch = innerHeight;
+  DPR = Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(3.4e6 / (cw * ch)));
+  W = Math.max(1, Math.floor(cw * DPR)); H = Math.max(1, Math.floor(ch * DPR));
+  for (const c of [cv, scene, trail, vig]) { c.width = W; c.height = H; }
+  g1.width = Math.max(1, W >> 2); g1.height = Math.max(1, H >> 2);
+  g2.width = Math.max(1, W >> 4); g2.height = Math.max(1, H >> 4);
+  S = Math.min(W, H * 1.15) / 1000; CX = W / 2; CY = H / 2;
+  const r = vx.createRadialGradient(CX, CY, Math.min(W, H) * 0.3, CX, CY, Math.hypot(W, H) * 0.62);
+  r.addColorStop(0, 'rgba(0,0,0,0)'); r.addColorStop(1, 'rgba(0,0,0,0.8)');
+  vx.fillStyle = r; vx.fillRect(0, 0, W, H);
+  for (const d of DUST) { d.x = rnd() * W; d.y = rnd() * H; }
+}
+
+const audio = new Audio(SRC);
+audio.preload = 'auto';
+let started = false, ended = false, loadError = false;
+audio.addEventListener('error', () => { loadError = true; });
+audio.addEventListener('ended', () => { ended = true; started = false; });
+function toggle() {
+  if (loadError) return;
+  if (!started) { started = true; ended = false; audio.currentTime = 0; resync(0); }
+  if (audio.paused) audio.play().catch(e => { started = false; console.error(e); });
+  else audio.pause();
+}
+// ===== pointer: click to play/pause, drag along the timeline to scrub =====
+const ui = { hover: false, drag: false, mx: -1, my: -1, moved: -9, legend: true, autoHidden: false, la: 1, ex: 0, startOnRelease: false };
+const songDur = () => audio.duration || 238;
+const bar = () => ({ x0: 24 * DPR, x1: W - 24 * DPR, y: H - 20 * DPR, top: H - 54 * DPR });
+function scrubTo(px) {
+  const b = bar();
+  if (!started) { started = true; ended = false; ui.startOnRelease = true; }
+  audio.currentTime = Math.min(clamp((px - b.x0) / (b.x1 - b.x0)) * songDur(), songDur() - 0.3);
+}
+cv.addEventListener('pointerdown', e => {
+  if (loadError || e.clientY * DPR < bar().top) return;
+  ui.drag = true;
+  cv.setPointerCapture(e.pointerId);
+  scrubTo(e.clientX * DPR);
+});
+cv.addEventListener('pointermove', e => {
+  ui.mx = e.clientX * DPR; ui.my = e.clientY * DPR; ui.moved = u;
+  ui.hover = e.clientY * DPR >= bar().top;
+  if (ui.drag) scrubTo(ui.mx);
+  cv.style.cursor = ui.hover || ui.drag ? 'ew-resize' : 'pointer';
+});
+cv.addEventListener('pointerup', () => {
+  if (!ui.drag) return;
+  ui.drag = false;
+  if (ui.startOnRelease) { ui.startOnRelease = false; audio.play().catch(e => { started = false; console.error(e); }); }
+});
+cv.addEventListener('pointerleave', () => { ui.hover = false; ui.my = -1; });
+cv.addEventListener('click', e => { if (e.clientY * DPR < bar().top) toggle(); });
+addEventListener('keydown', e => {
+  ui.moved = u;
+  if (e.code === 'Space') { e.preventDefault(); toggle(); }
+  if (e.code === 'KeyH') ui.legend = !ui.legend;
+  if (!started) return;
+  if (e.code === 'ArrowRight') audio.currentTime = Math.min((audio.duration || 1e9) - 0.5, audio.currentTime + 10);
+  if (e.code === 'ArrowLeft') audio.currentTime = Math.max(0, audio.currentTime - 10);
+});
+
+// audio.currentTime can tick coarsely; extrapolate with the wall clock between ticks
+const clock = { a: -1, base: 0, at: 0 };
+function songTime() {
+  const a = audio.currentTime, p = performance.now() / 1000;
+  if (audio.paused) { clock.a = a; clock.base = a; clock.at = p; return a; }
+  if (a !== clock.a) {
+    const guess = clock.base + (p - clock.at);
+    clock.a = a;
+    clock.base = Math.abs(guess - a) < 0.08 ? lerp(guess, a, 0.3) : a;
+    clock.at = p;
+  }
+  return clock.base + (p - clock.at);
+}
+
+// ===== glow sprites (pre-rendered radial gradients, cached by colour) =====
+const sprites = new Map();
+function sprite(h, s, l, soft) {
+  h = ((Math.round(h / 5) * 5) % 360 + 360) % 360; s = Math.round(s / 10) * 10; l = Math.round(l / 8) * 8;
+  const key = h * 1e6 + s * 1e3 + l + (soft ? 0.5 : 0);
+  let c = sprites.get(key);
+  if (!c) {
+    c = document.createElement('canvas'); c.width = c.height = 64;
+    const g = c.getContext('2d'), r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    if (soft) {
+      r.addColorStop(0, hsl(h, s, l, 0.55)); r.addColorStop(0.5, hsl(h, s, l, 0.22)); r.addColorStop(1, hsl(h, s, l, 0));
+    } else {
+      r.addColorStop(0, hsl(h, s * 0.4, Math.min(97, l + 35), 1)); r.addColorStop(0.15, hsl(h, s, l, 0.9));
+      r.addColorStop(0.42, hsl(h, s, l * 0.75, 0.25)); r.addColorStop(1, hsl(h, s, l * 0.5, 0));
+    }
+    g.fillStyle = r; g.fillRect(0, 0, 64, 64);
+    sprites.set(key, c);
+  }
+  return c;
+}
+function dot(g, x, y, r, h, s, l, a, soft) {
+  if (a <= 0.004 || r <= 0.3) return;
+  g.globalAlpha = Math.min(1, a);
+  g.drawImage(sprite(h, s, l, soft), x - r, y - r, r * 2, r * 2);
+  g.globalAlpha = 1;
+}
+function orb(g, x, y, r, h, s, l, a) {
+  dot(g, x, y, r * 7, h, s, l * 0.8, a * 0.3);
+  dot(g, x, y, r * 2.6, h, s, l, a * 0.85);
+  dot(g, x, y, r * 1.1, h, s * 0.5, 90, a);
+}
+
+// ===== palette over time: [t, transition, sky top, sky bottom, accent hue, accent sat] =====
+const PAL = [
+  [0, 1, [2, 3, 10], [6, 10, 26], 215, 55],
+  [17, 4, [3, 5, 14], [9, 15, 36], 215, 55],
+  [24.1, 1.5, [5, 5, 14], [16, 15, 34], 45, 70],     // the cross glows
+  [28, 3, [4, 5, 14], [14, 16, 36], 45, 65],
+  [37.9, 0.6, [3, 4, 12], [9, 12, 30], 215, 45],     // "my fault": the light goes out
+  [42.8, 2, [8, 6, 8], [26, 18, 16], 32, 70],        // drunken amber haze
+  [50.8, 0.15, [12, 3, 8], [32, 6, 16], 352, 75],    // impact
+  [55.8, 0.3, [14, 2, 6], [44, 4, 12], 352, 88],     // chorus 1: blood
+  [75.1, 4, [12, 3, 5], [34, 9, 8], 10, 80],         // embers
+  [84.7, 3, [14, 8, 5], [42, 24, 10], 36, 85],       // fatherhood: warm
+  [96.8, 1.2, [9, 8, 10], [22, 18, 24], 225, 40],    // "hates me": cold
+  [102, 1.2, [11, 4, 8], [30, 8, 16], 348, 60],      // "like my father"
+  [106, 3, [8, 6, 10], [22, 16, 22], 30, 55],
+  [123.1, 0.3, [14, 2, 6], [46, 4, 12], 352, 90],    // chorus 2
+  [142.4, 4, [12, 3, 5], [34, 9, 8], 10, 80],
+  [151.9, 4, [6, 4, 12], [18, 11, 28], 272, 35],     // smoke
+  [171.1, 2, [3, 6, 12], [10, 16, 30], 205, 30],     // empty house: cold
+  [188.4, 0.6, [10, 3, 8], [30, 6, 14], 350, 70],    // broken record
+  [190.3, 0.4, [14, 2, 6], [44, 4, 12], 352, 90],    // chorus 3
+  [210, 6, [8, 3, 9], [22, 6, 18], 345, 60],
+  [221, 5, [2, 3, 10], [6, 10, 26], 215, 50],        // back to the moon
+  [233, 4.5, [0, 0, 0], [0, 0, 0], 215, 40],
+];
+function palette(t) {
+  const top = PAL[0][2].slice(), bot = PAL[0][3].slice();
+  let hue = PAL[0][4], sat = PAL[0][5];
+  for (let i = 1; i < PAL.length; i++) {
+    const [t0, d, tp, bt, h, s] = PAL[i];
+    if (t < t0) break;
+    const k = smooth(0, 1, (t - t0) / Math.max(0.01, d));
+    for (let j = 0; j < 3; j++) { top[j] = lerp(top[j], tp[j], k); bot[j] = lerp(bot[j], bt[j], k); }
+    hue = lerpHue(hue, h, k); sat = lerp(sat, s, k);
+  }
+  return { top, bot, hue, sat };
+}
+
+// ===== element visibility over time =====
+const TR = {
+  stars:   [[0, 0.9], [17, 1], [50.5, 1], [51.2, 0.35], [55.8, 0], [84.7, 0], [87, 0.35], [97, 0.35], [101, 0.1], [123, 0], [151.9, 0], [156, 0.7], [171, 0.5], [188, 0.2], [190.3, 0], [213, 0], [222, 0.9], [234, 0.9], [237.5, 0]],
+  moon:    [[0, 0], [4, 0.12], [16, 0.3], [20.3, 0.35], [21.1, 1], [49.8, 1], [51, 0.4], [55.8, 0], [152, 0], [157, 0.3], [170, 0.2], [173, 0], [218, 0], [224.5, 0.95], [234, 0.95], [237.5, 0]],
+  window:  [[0, 0], [21.5, 0], [22.6, 1], [49.8, 1], [51, 0.5], [55.8, 0], [219, 0], [224.8, 0.85], [234, 0.85], [237, 0]],
+  record:  [[0, 0.32], [16, 0.32], [18.5, 0.07], [54.8, 0.07], [55.8, 1], [75.1, 1], [84.7, 0.35], [86.5, 0.1], [122.6, 0.1], [123.16, 1], [142.4, 1], [151.9, 0.3], [154, 0.12], [187.9, 0.12], [188.5, 1], [209.9, 1], [222, 0.25], [229, 0.1], [234, 0]],
+  blood:   [[0, 0], [55.4, 0], [55.8, 1], [75.14, 1], [78, 0.6], [84.75, 0], [122.8, 0], [123.16, 1], [142.36, 1], [145, 0.6], [151.9, 0], [188.2, 0], [188.6, 0.5], [190.33, 0.75], [196, 0.85], [200, 1], [209.9, 1], [214, 0.5], [229, 0]],
+  rays:    [[27.9, 0], [28.8, 0.85], [31.8, 1], [37.7, 1], [38.25, 0]],
+  child:   [[17.2, 0], [18.6, 0.5], [30.9, 0.5], [31.3, 1], [55.6, 1], [57.2, 0], [224, 0], [226.5, 0.75], [234.5, 0.75], [237, 0]],
+  mama:    [[29.9, 0], [30.7, 1], [55.6, 1], [57.2, 0]],
+  lift:    [[31.3, 0], [35.2, 1], [37.9, 1], [39.3, 0]],
+  crossA:  [[24, 0.85], [24.3, 1], [37.8, 1], [38.6, 0.45], [50.6, 0.45], [51.2, 0.2], [55.8, 0.1], [56.8, 0]],
+  warp:    [[42.7, 0], [43.3, 1], [45.5, 1], [45.9, 1.6], [48.6, 1.1], [50.6, 0], [109.9, 0], [110.5, 1.3], [112.3, 0.8], [113.2, 0]],
+  father:  [[84.6, 0], [85.9, 1], [121.8, 1], [123.16, 0]],
+  fHue:    [[84.7, 38], [101.8, 38], [102.8, 350]],
+  kid:     [[87.6, 0], [88.3, 1], [113.4, 1], [114.4, 0]],
+  kidHue:  [[87, 42], [96.9, 42], [98.2, 225]],
+  sheila:  [[164.2, 0], [164.9, 1], [167.5, 0.8], [171, 0.5], [174, 0]],
+  house:   [[169.2, 0], [169.6, 1], [187.6, 1], [189.6, 0.2], [191.5, 0]],
+  houseK:  [[169.3, 0], [172.6, 1]],
+  smoke:   [[157.9, 0], [158.5, 1], [166, 0.85], [172, 0.35], [176, 0]],
+  comeBack:[[177.4, 0], [178.2, 0.9], [179.5, 0.9], [180.6, 0]],
+  other:   [[182.6, 0], [183.7, 0.85], [185.6, 0.5], [187.4, 0]],
+  rings:   [[0, 0.25], [17, 0.3], [50, 0.45], [55.8, 1], [75.1, 0.8], [84.7, 0.35], [96, 0.6], [123.16, 1], [142.4, 0.8], [151.9, 0.25], [171.1, 0.5], [190.33, 0.8], [200, 1], [209.9, 0.8], [216, 0.4], [226, 0.2], [230, 0]],
+  spin:    [[0, 0.12], [55.8, 0.35], [84.7, 0.12], [123.16, 0.35], [151.9, 0.12], [188.3, 0.12], [188.6, 1.4], [190.3, 0.6], [210, 0.35], [230, 0.1]],
+  veins:   [[55.8, 0], [60, 0.45], [63, 0.7], [70, 1], [76, 1], [84, 0], [123.1, 0], [127.5, 0.5], [130, 0.75], [136, 1], [142.4, 1], [150, 0], [190.3, 0], [195, 0.4], [198.5, 0.65], [204, 1], [210, 1], [222, 0]],
+  broken:  [[188.3, 0], [188.6, 1], [210, 1], [216, 0]],
+};
+
+// ===== lyric-timed cues (seconds) =====
+// one-shot bursts: [time, kind]
+const BURSTS = [
+  [50.84, 'hit'], [52.38, 'hate'], [54.72, 'hate'],
+  [57.16, 'in'], [59.66, 'out'], [62.06, 'all'], [66.84, 'in'], [69.22, 'out'], [71.68, 'all'],
+  [89.58, 'joy'], [90.24, 'joy'], [113.56, 'scatter'],
+  [124.42, 'in'], [126.74, 'out'], [129.24, 'all'], [133.94, 'in'], [136.30, 'out'], [138.66, 'all'],
+  [188.48, 'crack'],
+  [191.56, 'in'], [193.98, 'out'], [196.44, 'all'], [201.24, 'in'], [203.64, 'out'], [206.08, 'all'],
+].map(([t, k]) => [snap(t), k]).sort((a, b) => a[0] - b[0]);
+// shake + flash: [time, strength]
+const IMPACTS = [[50.84, 1], [52.38, 0.35], [54.72, 0.45], [102.14, 0.3], [188.48, 0.45],
+  [62.06, 0.55], [71.68, 0.55], [129.24, 0.6], [138.66, 0.6], [196.44, 0.6], [206.08, 0.65]].map(([t, a]) => [snap(t), a]);
+// searchlight sweeps: [start, end, from angle, to angle, moment it lands, target]
+const SEEK = [
+  [62.7, 65.2, -0.8, 0.42, 64.96], [72.4, 74.9, 0.75, -0.38, 74.6],
+  [130.0, 132.4, -0.7, 0.5, 132.12], [139.6, 142.0, 0.8, -0.45, 141.76],
+  [151.0, 153.7, 0.15, -0.35, -1],                              // the search for a father ends: the beam flickers out
+  [197.2, 199.6, -0.75, 0.4, 199.3], [206.8, 209.2, 0.7, -0.5, 208.86],
+  [215.8, 218.8, -0.6, 0.55, 218.44], [225.8, 228.4, 0.7, 0, 228.0, 'child'],
+];
+const SHOULD = [117.12, 118.30, 119.48, 121.82];   // echo rings that never come back
+const CALLED = [120.14, 122.56];
+const OH = [220.06, 222.0, 223.94];
+
+// ===== static geometry =====
+const STARS = Array.from({ length: 230 }, () => ({ x: rnd(), y: rnd() * 0.85, r: 0.6 + rnd() * rnd() * 2.6, ph: rnd() * TAU, sp: 0.6 + rnd() * 2.5 }));
+const DUST = Array.from({ length: 220 }, () => ({ x: 0, y: 0, z: 0.25 + rnd() * 0.75, ph: rnd() * TAU }));
+const MARIA = [[-0.3, -0.2, 0.28], [0.25, 0.1, 0.22], [-0.05, 0.4, 0.16], [0.35, -0.35, 0.12]];
+// fracture lines (unit space)
+const CRACKS = [];
+for (let i = 0; i < 11; i++) {
+  let a = i / 11 * TAU + rnd() * 0.5, x = 0, y = 0;
+  const pts = [[0, 0]], n = 7 + Math.floor(rnd() * 8);
+  for (let j = 0; j < n; j++) { a += (rnd() - 0.5) * 0.9; const l = 16 + rnd() * 30; x += Math.cos(a) * l; y += Math.sin(a) * l; pts.push([x, y]); }
+  CRACKS.push({ pts, delay: 0 });
+  if (rnd() < 0.6) {
+    const k = 2 + Math.floor(rnd() * (n - 3));
+    let [bx, by] = pts[k], ba = a + (rnd() < 0.5 ? -1 : 1) * (0.7 + rnd() * 0.5);
+    const bp = [[bx, by]];
+    for (let j = 0; j < 5; j++) { ba += (rnd() - 0.5) * 0.8; const l = 10 + rnd() * 20; bx += Math.cos(ba) * l; by += Math.sin(ba) * l; bp.push([bx, by]); }
+    CRACKS.push({ pts: bp, delay: k / n });
+  }
+}
+const CRACK_AT = [
+  { t: snap(50.84), at: 'mama', sc: 1.4, rot: 0.3, hue: 355, a: [[50.8, 1], [55.8, 0.6], [58.5, 0]], flare: [52.38, 54.72] },
+  { t: 102.14, at: 'father', sc: 0.8, rot: 2.1, hue: 350, a: [[102.1, 0.9], [105.6, 0.7], [106.6, 0.25], [121, 0.2], [123.2, 0]], flare: [105.68] },
+  { t: 175.28, at: 'wall', sc: 0.45, rot: 4.0, hue: 205, a: [[175.2, 0.8], [187.5, 0.6], [189.6, 0]], flare: [] },
+];
+// veins growing out of the heart/record
+const VEINS = [];
+function growVein(x, y, ang, len, depth, d) {
+  const steps = 6 + Math.floor(rnd() * 5);
+  for (let i = 0; i < steps; i++) {
+    const L = len * (0.6 + rnd() * 0.6);
+    ang += (rnd() - 0.5) * 0.55;
+    const nx = x + Math.cos(ang) * L, ny = y + Math.sin(ang) * L;
+    VEINS.push({ x0: x, y0: y, x1: nx, y1: ny, d, w: Math.max(0.7, 3.4 - depth * 0.9 - i * 0.14) });
+    x = nx; y = ny; d += L;
+    if (depth < 3 && rnd() < 0.24) growVein(x, y, ang + (rnd() < 0.5 ? -1 : 1) * (0.45 + rnd() * 0.5), len * 0.78, depth + 1, d);
+  }
+}
+for (let i = 0; i < 10; i++) { const a = i / 10 * TAU + rnd() * 0.35; growVein(Math.cos(a) * 240, Math.sin(a) * 240, a, 36, 0, 0); }
+{
+  const maxD = Math.max(...VEINS.map(v => v.d)) || 1;
+  for (const v of VEINS) v.d /= maxD;
+}
+const VBINS = 22;   // veins are drawn in distance buckets x width classes to keep the path count low
+const VEIN_GROUPS = [];
+for (let b = 0; b < VBINS; b++) for (let c = 0; c < 3; c++) VEIN_GROUPS.push({ b, c, segs: [] });
+for (const v of VEINS) VEIN_GROUPS[Math.min(VBINS - 1, Math.floor(v.d * VBINS)) * 3 + (v.w > 2.2 ? 2 : v.w > 1.3 ? 1 : 0)].segs.push(v);
+// crack across the record
+const RCRACK = [[0.3, 0]];
+for (let r = 0.36; r <= 1.02; r += 0.06) RCRACK.push([r, (rnd() - 0.5) * 0.09]);
+// the house (unit space around its centre)
+const HOUSE = [
+  [[-190, 170], [-190, -120], [190, -120], [190, 170], [-190, 170]],
+  [[-235, -116], [0, -300], [235, -116]],
+  [[-42, 170], [-42, 40], [42, 40], [42, 170]],
+  [[80, -60], [160, -60], [160, 20], [80, 20], [80, -60]],
+  [[120, -60], [120, 20]], [[80, -20], [160, -20]],
+].map(pts => ({ pts, len: pts.slice(1).reduce((s, p, i) => s + Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]), 0) }));
+
+// ===== live state =====
+let u = 0;                     // wall-clock seconds (ambient motion)
+let lastU = performance.now() / 1000, lastT = 0;
+let beatPtr = -1, wordPtr = 0, burstPtr = 0;
+let recRot = 0, coreKick = 0, pal = palette(0);
+const parts = [], rings = [], puffs = [];
+let smokeAcc = 0;
+const L = { child: [0, 0], mama: [0, 0], father: [0, 0], kid: [0, 0], wall: [0, 0], win: null, moon: null };
+
+function resync(t) {
+  parts.length = 0; rings.length = 0; puffs.length = 0;
+  beatPtr = beatAt(t).i;
+  wordPtr = lowerBound(WORDS, t);
+  burstPtr = lowerBound(BURSTS, t);
+  lastT = t;
+}
+
+function layout(t) {
+  L.win = { x: CX, y: CY - 70 * S, hw: 185 * S, hh: 235 * S };
+  L.moon = { x: CX + 92 * S, y: CY - 190 * S, r: 44 * S };
+  const lift = track(TR.lift, t) * 70 * S;
+  const br = Math.sin(u * 1.4) * 3 * S;
+  L.child = [CX + 18 * S, CY + 250 * S - lift + br];
+  L.mama = [CX - 24 * S, CY + 240 * S - lift * 0.9 - br];
+  const hitK = after(t, snap(50.84), 0.35);
+  L.mama[0] += Math.sin(t * 60) * hitK * 22 * S - hitK * 30 * S;
+  const lurch = smooth(112.3, 113.6, t) * (1 - smooth(115.5, 118.5, t));
+  L.father = [CX - 40 * S + 20 * S * Math.sin(u * 0.3) + 190 * S * lurch, CY + 30 * S + 12 * S * Math.sin(u * 0.4)];
+  const orbitR = smooth(87.7, 89.4, t) * 92 * S + smooth(97.2, 100.8, t) * 230 * S + smooth(113.5, 114.8, t) * 800 * S;
+  const oa = u * 0.8;
+  L.kid = [L.father[0] + Math.cos(oa) * orbitR, L.father[1] + Math.sin(oa) * orbitR * 0.6];
+  L.wall = [CX + 120 * S, CY + 10 * S];
+}
+
+function voiceSrc(t) {
+  if (t < SEC.v1) return [CX, CY];
+  if (t < SEC.ch1) return L.child;
+  if (t < SEC.v2 || (t >= SEC.ch2 && t < SEC.v3) || (t >= SEC.ch3 && t < 215)) {
+    const a = rnd() * TAU, r = 235 * S;
+    return [CX + Math.cos(a) * r, CY + Math.sin(a) * r];
+  }
+  if (t < SEC.ch2) return L.father;
+  if (t < SEC.house) return [CX - 60 * S, CY + 200 * S];
+  if (t < SEC.ch3) return [CX, CY + 180 * S];
+  return L.child;
+}
+
+// ===== particles =====
+function addP(p) { if (parts.length < 3000) parts.push(p); }
+function P(x, y, vx, vy, life, h, s, l, size, o = {}) {
+  addP(Object.assign({ x, y, vx, vy, life, max: life, h, s, l, size, a: 0.9, drag: 0.4, g: 0, attract: false, streak: 0 }, o));
+}
+
+function onBeat(b, t) {
+  const amt = track(TR.rings, t);
+  if (amt > 0.02) rings.push({ t0: BEATS[b.i], a: amt * (b.down ? 1 : 0.5) * (0.6 + 0.6 * b.acc), w: b.down ? 3 : 1.5, hue: pal.hue, sat: pal.sat });
+  // the broken record skips back on every beat
+  if (t > 188.45 && t < 190.4) recRot -= 0.7;
+  const blood = track(TR.blood, t);
+  if (blood > 0.3 && b.down) {
+    for (let i = 0; i < 40 * blood; i++) {
+      const a = rnd() * TAU, r = 235 * S, sp = (150 + rnd() * 250) * S;
+      P(CX + Math.cos(a) * r, CY + Math.sin(a) * r, Math.cos(a) * sp, Math.sin(a) * sp, 0.8 + rnd() * 0.6, 355 + rnd() * 12, 85, 55, 1.6 * S, { streak: 0.04, drag: 0.15 });
+    }
+  }
+}
+
+function onWord(w, t) {
+  const dur = Math.min(1.2, w[1] - w[0]);
+  const n = 2 + Math.round(dur * 5);
+  for (let i = 0; i < n; i++) {
+    const [x, y] = voiceSrc(t);
+    const a = rnd() * TAU, sp = (40 + rnd() * 100) * S;
+    P(x, y, Math.cos(a) * sp, Math.sin(a) * sp - 30 * S, 1 + rnd() * 1.3, pal.hue + (rnd() - 0.5) * 24, Math.min(90, pal.sat + 10), 72,
+      (2 + dur * 4) * S, { a: 0.7, drag: 0.5, g: -14 * S });
+  }
+}
+
+function onBurst(kind, t) {
+  if (kind === 'in') {
+    for (let i = 0; i < 260; i++) {
+      const a = rnd() * TAU, r = (650 + rnd() * 600) * S;
+      P(CX + Math.cos(a) * r, CY + Math.sin(a) * r, -Math.sin(a) * 140 * S, Math.cos(a) * 140 * S, 2.4, 350 + rnd() * 16, 88, 45 + rnd() * 25,
+        (1 + rnd() * 1.6) * S, { attract: true, drag: 0.35, streak: 0.05 });
+    }
+  } else if (kind === 'out' || kind === 'all') {
+    const big = kind === 'all';
+    for (let i = 0; i < (big ? 480 : 280); i++) {
+      const a = rnd() * TAU, r = 235 * S, sp = (500 + rnd() * (big ? 1500 : 900)) * S;
+      P(CX + Math.cos(a) * r, CY + Math.sin(a) * r, Math.cos(a) * sp, Math.sin(a) * sp, 1.2 + rnd() * 1.3, 348 + rnd() * 20, 85, 45 + rnd() * 30,
+        (1 + rnd() * 1.8) * S, { drag: 0.22, streak: 0.045 });
+    }
+    if (big) rings.push({ t0: t, a: 1.4, w: 9, hue: 0, sat: 30 });
+  } else if (kind === 'hit') {
+    for (let i = 0; i < 90; i++) {
+      const a = rnd() * TAU, sp = (300 + rnd() * 900) * S;
+      P(L.mama[0], L.mama[1], Math.cos(a) * sp, Math.sin(a) * sp, 0.6 + rnd() * 0.8, rnd() < 0.5 ? 0 : 355, 30 + rnd() * 50, 80, 1.4 * S, { drag: 0.1, streak: 0.03 });
+    }
+  } else if (kind === 'hate') {
+    for (let i = 0; i < 50; i++) {
+      const a = -Math.PI / 2 + (rnd() - 0.5) * 2.4, sp = (200 + rnd() * 500) * S;
+      P(L.child[0], L.child[1], Math.cos(a) * sp, Math.sin(a) * sp, 0.7 + rnd() * 0.7, 2 + rnd() * 14, 90, 55, 1.6 * S, { drag: 0.2, streak: 0.04, g: 300 * S });
+    }
+  } else if (kind === 'joy') {
+    for (const [x, y] of [L.kid, L.father]) for (let i = 0; i < 34; i++) {
+      const a = rnd() * TAU, sp = (60 + rnd() * 260) * S;
+      P(x, y, Math.cos(a) * sp, Math.sin(a) * sp, 1 + rnd() * 1.2, 40 + rnd() * 15, 90, 70, (2 + rnd() * 3) * S, { drag: 0.3, g: 60 * S });
+    }
+  } else if (kind === 'scatter') {
+    for (let i = 0; i < 70; i++) {
+      const a = rnd() * TAU, sp = (300 + rnd() * 700) * S;
+      P(L.father[0], L.father[1], Math.cos(a) * sp, Math.sin(a) * sp, 1 + rnd(), 220, 50, 75, 1.8 * S, { drag: 0.4, streak: 0.04 });
+    }
+  } else if (kind === 'crack') {
+    for (let i = 0; i < 120; i++) {
+      const a = rnd() * TAU, sp = (300 + rnd() * 900) * S;
+      P(CX, CY, Math.cos(a) * sp, Math.sin(a) * sp, 0.8 + rnd(), 350, 40, 85, 1.4 * S, { drag: 0.2, streak: 0.035 });
+    }
+  }
+}
+
+function updateParticles(g, dt) {
+  g.globalCompositeOperation = 'lighter';
+  g.lineCap = 'round';
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    p.life -= dt;
+    if (p.life <= 0) { parts[i] = parts[parts.length - 1]; parts.pop(); continue; }
+    if (p.attract) {
+      const dx = CX - p.x, dy = CY - p.y, d = Math.hypot(dx, dy) + 1e-3, acc = 2800 * S;
+      p.vx += dx / d * acc * dt; p.vy += dy / d * acc * dt;
+      if (d < 160 * S) { p.life = 0; coreKick = Math.min(1, coreKick + 0.006); continue; }
+    }
+    const k = Math.pow(p.drag, dt);
+    p.vx *= k; p.vy *= k; p.vy += p.g * dt;
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    const fade = Math.min(1, p.life / (p.max * 0.5)) * Math.min(1, (p.max - p.life) * 12 + 0.3);
+    const a = p.a * fade;
+    if (p.streak) {
+      g.strokeStyle = hsl(p.h, p.s, p.l, a);
+      g.lineWidth = p.size;
+      g.beginPath(); g.moveTo(p.x - p.vx * p.streak, p.y - p.vy * p.streak); g.lineTo(p.x, p.y); g.stroke();
+    } else {
+      dot(g, p.x, p.y, p.size * 2.5, p.h, p.s, p.l, a);
+    }
+  }
+}
+
+// ===== drawing: one function per story element =====
+function drawSky(g, t, b) {
+  const lift = 1 + 0.25 * b.pump * track(TR.blood, t) + 0.1 * b.pump;
+  const gr = g.createLinearGradient(0, 0, 0, H);
+  gr.addColorStop(0, rgb(pal.top.map(v => v * lift)));
+  gr.addColorStop(1, rgb(pal.bot.map(v => v * lift)));
+  g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+  g.fillStyle = gr; g.fillRect(0, 0, W, H);
+}
+
+function drawStars(g, t, v) {
+  if (v < 0.01) return;
+  g.globalCompositeOperation = 'lighter';
+  const tw = env(TREB, t);
+  for (const s of STARS) {
+    const a = v * (0.25 + 0.55 * (0.5 + 0.5 * Math.sin(u * s.sp + s.ph))) * (0.7 + 0.5 * tw);
+    dot(g, s.x * W, s.y * H, s.r * 2.4 * S, 220, 30, 85, a);
+  }
+}
+
+function drawDust(g, du, t, energy, blood) {
+  g.globalCompositeOperation = 'lighter';
+  const speed = (14 + 50 * energy + 110 * blood) * S;
+  const rise = (blood * 50 + 10) * S;
+  for (const d of DUST) {
+    const ang = noise2(d.x / (260 * S), d.y / (260 * S) + u * 0.04) * TAU * 1.4;
+    d.x += Math.cos(ang) * speed * d.z * du;
+    d.y += (Math.sin(ang) * speed * d.z - rise * d.z) * du;
+    if (d.x < -20) d.x += W + 40; if (d.x > W + 20) d.x -= W + 40;
+    if (d.y < -20) d.y += H + 40; if (d.y > H + 20) d.y -= H + 40;
+    const a = (0.12 + 0.18 * d.z) * (0.6 + 0.4 * Math.sin(u * 2 + d.ph));
+    dot(g, d.x, d.y, (2 + 3 * d.z) * S, blood > 0.4 ? 10 : pal.hue, Math.max(30, pal.sat), 65, a);
+  }
+}
+
+function drawRays(g, t, v) {
+  if (v < 0.01) return;
+  g.globalCompositeOperation = 'lighter';
+  const ox = CX, oy = -220 * S, len = H + 500 * S, m = env(MID, t);
+  for (let i = 0; i < 7; i++) {
+    const a = (i - 3) * 0.085 + 0.025 * Math.sin(u * 0.4 + i * 1.7);
+    const w = 0.022 + 0.01 * Math.sin(u * 0.7 + i);
+    const al = v * (0.09 + 0.05 * Math.sin(u * 1.3 + i * 2.1)) * (0.6 + 0.6 * m);
+    const gr = g.createLinearGradient(ox, oy, ox, oy + len);
+    gr.addColorStop(0, hsl(45, 70, 80, 0)); gr.addColorStop(0.35, hsl(45, 70, 78, al)); gr.addColorStop(1, hsl(40, 60, 60, 0));
+    g.fillStyle = gr;
+    g.beginPath(); g.moveTo(ox, oy);
+    g.lineTo(ox + Math.sin(a - w) * len, oy + Math.cos(a - w) * len);
+    g.lineTo(ox + Math.sin(a + w) * len, oy + Math.cos(a + w) * len);
+    g.closePath(); g.fill();
+  }
+}
+
+function drawMoon(g, t, v, b) {
+  if (v < 0.01) return;
+  const m = L.moon;
+  g.globalCompositeOperation = 'lighter';
+  dot(g, m.x, m.y, m.r * 8, 215, 50, 64, v * 0.32 * (1 + 0.3 * b.pump));
+  dot(g, m.x, m.y, m.r * 2.6, 210, 40, 80, v * 0.45);
+  g.globalCompositeOperation = 'source-over';
+  const gr = g.createRadialGradient(m.x - m.r * 0.3, m.y - m.r * 0.3, m.r * 0.1, m.x, m.y, m.r);
+  gr.addColorStop(0, `rgba(242,245,255,${v})`); gr.addColorStop(1, `rgba(185,196,224,${v})`);
+  g.fillStyle = gr; g.beginPath(); g.arc(m.x, m.y, m.r, 0, TAU); g.fill();
+  g.fillStyle = `rgba(110,122,156,${v * 0.28})`;
+  for (const [dx, dy, rr] of MARIA) { g.beginPath(); g.arc(m.x + dx * m.r, m.y + dy * m.r, rr * m.r, 0, TAU); g.fill(); }
+}
+
+function drawWindow(g, v) {
+  if (v < 0.01) return;
+  const w = L.win, fy = w.y + w.hh;
+  g.globalCompositeOperation = 'lighter';
+  const gr = g.createLinearGradient(0, fy, 0, fy + 280 * S);
+  gr.addColorStop(0, hsl(215, 40, 70, 0.09 * v)); gr.addColorStop(1, hsl(215, 40, 70, 0));
+  g.fillStyle = gr;
+  g.beginPath(); g.moveTo(w.x - w.hw, fy); g.lineTo(w.x + w.hw, fy); g.lineTo(w.x + w.hw * 1.7, fy + 280 * S); g.lineTo(w.x - w.hw * 1.7, fy + 280 * S); g.fill();
+  g.strokeStyle = hsl(215, 35, 75, 0.5 * v); g.lineWidth = 2.2 * S;
+  g.strokeRect(w.x - w.hw, w.y - w.hh, w.hw * 2, w.hh * 2);
+  g.strokeStyle = hsl(215, 35, 75, 0.2 * v); g.lineWidth = 1 * S;
+  g.strokeRect(w.x - w.hw - 12 * S, w.y - w.hh - 12 * S, w.hw * 2 + 24 * S, w.hh * 2 + 24 * S);
+  g.beginPath(); g.moveTo(w.x - w.hw - 34 * S, fy + 16 * S); g.lineTo(w.x + w.hw + 34 * S, fy + 16 * S); g.stroke();
+}
+
+// the window's cross: pulled off the wall into the child's hands, back on the wall at the end
+function drawCross(g, t) {
+  const w = L.win, winV = track(TR.window, t);
+  let c;
+  if (t > 150) c = { x: w.x, y: w.y, hw: w.hw, up: w.hh, dn: w.hh, rot: 0, hue: 215, sat: 35, l: 72, a: winV * 0.8, lw: 2 * S, glow: 0 };
+  else {
+    const fall = smooth(25.4, 27.6, t), gold = smooth(24.0, 24.6, t);
+    const tx = L.child[0] - 4 * S, ty = L.child[1] - 44 * S;
+    c = {
+      x: lerp(w.x, tx, fall), y: lerp(w.y, ty, fall * fall),
+      hw: lerp(w.hw, 20 * S, fall), up: lerp(w.hh, 24 * S, fall), dn: lerp(w.hh, 50 * S, fall),
+      rot: Math.sin(fall * Math.PI) * 0.7,
+      hue: lerpHue(215, 45, gold), sat: lerp(35, 80, gold), l: lerp(72, 70, gold),
+      a: t < 24 ? winV * 0.8 : track(TR.crossA, t), lw: lerp(2, 3.2, fall) * S,
+      glow: swell(t, 24.16, 0.25, 1.4) + track(TR.rays, t) * 0.5,
+    };
+  }
+  if (c.a < 0.01) return;
+  g.save(); g.translate(c.x, c.y); g.rotate(c.rot);
+  g.globalCompositeOperation = 'lighter'; g.lineCap = 'round';
+  const path = () => { g.beginPath(); g.moveTo(-c.hw, 0); g.lineTo(c.hw, 0); g.moveTo(0, -c.up); g.lineTo(0, c.dn); };
+  g.strokeStyle = hsl(c.hue, c.sat, c.l, c.a * 0.2 * (1 + c.glow)); g.lineWidth = c.lw * 5; path(); g.stroke();
+  g.strokeStyle = hsl(c.hue, c.sat, c.l + 12, c.a); g.lineWidth = c.lw; path(); g.stroke();
+  g.restore();
+  if (c.glow > 0.02) dot(g, c.x, c.y, (60 + 140 * (1 - smooth(25.4, 27.6, t))) * S, c.hue, c.sat, 70, c.a * c.glow * 0.5);
+}
+
+function drawRecord(g, t, b, v, blood) {
+  if (v < 0.01) return;
+  const R = (205 + 40 * blood) * S * (1 + 0.07 * b.pump * blood + 0.05 * coreKick) * (1 + 0.04 * env(BASS, t) * blood);
+  const hue = lerpHue(220, pal.hue, Math.max(blood, 0.3)), sat = lerp(25, pal.sat, blood);
+  g.globalCompositeOperation = 'lighter';
+  if (blood > 0.01) dot(g, CX, CY, R * 2.6, pal.hue, pal.sat, 45, blood * (0.35 + 0.4 * b.pump + 0.5 * coreKick));
+  const N = 24;
+  for (let k = 0; k < N; k++) {
+    const f = k / (N - 1), r = R * (0.34 + 0.66 * f);
+    const wave = Math.exp(-Math.pow(f - b.since * 1.7, 2) * 45) * (0.3 + blood);
+    g.strokeStyle = hsl(hue, sat, 50 + 25 * wave, v * (0.12 + 0.55 * wave + (k % 4 === 0 ? 0.08 : 0)));
+    g.lineWidth = (k % 6 === 0 ? 1.8 : 0.9) * S;
+    g.beginPath(); g.arc(CX, CY, r, 0, TAU); g.stroke();
+  }
+  // static sheen (the grooves turn underneath it)
+  g.lineWidth = 2.2 * S;
+  for (let k = 0; k < N; k += 2) {
+    const r = R * (0.34 + 0.66 * k / (N - 1)), s0 = -0.9 + 0.05 * Math.sin(u * 0.5);
+    g.strokeStyle = hsl(hue, sat * 0.5, 88, v * 0.1);
+    g.beginPath(); g.arc(CX, CY, r, s0, s0 + 0.5); g.stroke();
+    g.beginPath(); g.arc(CX, CY, r, s0 + Math.PI, s0 + Math.PI + 0.5); g.stroke();
+  }
+  // label, rotating
+  g.save(); g.translate(CX, CY); g.rotate(recRot);
+  g.globalCompositeOperation = 'source-over';
+  g.fillStyle = hsl(pal.hue, pal.sat * 0.9, 18 + 22 * blood + 10 * b.pump * blood, v * 0.85);
+  g.beginPath(); g.arc(0, 0, R * 0.3, 0, TAU); g.fill();
+  g.globalCompositeOperation = 'lighter';
+  g.strokeStyle = hsl(pal.hue, pal.sat * 0.6, 75, v * 0.45); g.lineWidth = 1.4 * S;
+  g.beginPath(); g.arc(0, 0, R * 0.22, -0.4, 1.1); g.stroke();
+  g.beginPath(); g.arc(0, 0, R * 0.17, 2.4, 3.6); g.stroke();
+  g.fillStyle = `rgba(0,0,0,${v * 0.8})`;
+  g.globalCompositeOperation = 'source-over';
+  g.beginPath(); g.arc(0, 0, 5 * S, 0, TAU); g.fill();
+  const br = track(TR.broken, t);
+  if (br > 0.01) {
+    g.globalCompositeOperation = 'lighter';
+    g.strokeStyle = hsl(0, 20, 92, br * v * (0.6 + 0.4 * b.pump)); g.lineWidth = 2 * S;
+    g.beginPath();
+    RCRACK.forEach(([r, a], i) => { const x = Math.cos(1 + a) * r * R, y = Math.sin(1 + a) * r * R; i ? g.lineTo(x, y) : g.moveTo(x, y); });
+    g.stroke();
+  }
+  g.restore();
+}
+
+function drawVeins(g, t, b, grow) {
+  if (grow < 0.01) return;
+  g.globalCompositeOperation = 'lighter'; g.lineCap = 'round';
+  const s1 = b.since, s0 = b.since + b.len;   // the two most recent heartbeats travel outward
+  const sc = S * (1 + 0.04 * b.pump);
+  for (const grp of VEIN_GROUPS) {
+    if (!grp.segs.length) continue;
+    const d = (grp.b + 0.5) / VBINS;
+    if (d > grow) continue;
+    const wave = Math.exp(-Math.pow(d - s1 * 0.9, 2) * 70) + 0.6 * Math.exp(-Math.pow(d - s0 * 0.9, 2) * 70);
+    const tip = smooth(grow, grow - 0.12, d);
+    const a = tip * (0.22 + 0.8 * wave) * Math.min(1, grow * 2);
+    g.strokeStyle = hsl(354, 85, 42 + 30 * wave, a);
+    g.lineWidth = (grp.c === 2 ? 3 : grp.c === 1 ? 1.8 : 1) * S * (1 + wave * 0.6);
+    g.beginPath();
+    for (const v of grp.segs) { g.moveTo(CX + v.x0 * sc, CY + v.y0 * sc); g.lineTo(CX + v.x1 * sc, CY + v.y1 * sc); }
+    g.stroke();
+  }
+}
+
+function drawRings(g, t) {
+  g.globalCompositeOperation = 'lighter';
+  for (let i = rings.length - 1; i >= 0; i--) {
+    const r = rings[i], age = t - r.t0;
+    if (age < 0 || age > 2.4) { rings.splice(i, 1); continue; }
+    const rad = 230 * S + 760 * S * (1 - Math.exp(-age * 2));
+    const a = r.a * Math.exp(-age * 2.3);
+    g.strokeStyle = hsl(r.hue, r.sat, 70, a * 0.5); g.lineWidth = r.w * S;
+    g.beginPath(); g.arc(CX, CY, rad, 0, TAU); g.stroke();
+  }
+}
+
+function drawCracks(g, t) {
+  g.globalCompositeOperation = 'lighter'; g.lineCap = 'round'; g.lineJoin = 'round';
+  for (const c of CRACK_AT) {
+    if (t < c.t || t > c.a[c.a.length - 1][0]) continue;
+    const grow = smooth(c.t, c.t + 0.22, t);
+    const flare = c.flare.reduce((s, f) => s + after(t, f, 0.45), 0) + after(t, c.t, 0.5);
+    const a = track(c.a, t) * (0.55 + 0.6 * flare);
+    const [ox, oy] = L[c.at];
+    g.save(); g.translate(ox, oy); g.rotate(c.rot); g.scale(c.sc * S, c.sc * S);
+    for (const pass of [0, 1]) {
+      g.strokeStyle = pass ? hsl(c.hue, 40, 88, a) : hsl(c.hue, 90, 50, a * 0.35);
+      g.lineWidth = (pass ? 1.3 : 5) / c.sc;
+      g.beginPath();
+      for (const cr of CRACKS) {
+        const k = clamp((grow - cr.delay) / (1 - cr.delay + 1e-3));
+        const n = Math.ceil(k * (cr.pts.length - 1));
+        if (n < 1) continue;
+        g.moveTo(cr.pts[0][0], cr.pts[0][1]);
+        for (let j = 1; j <= n; j++) g.lineTo(cr.pts[j][0], cr.pts[j][1]);
+      }
+      g.stroke();
+    }
+    g.restore();
+  }
+}
+
+function drawTears(g, t) {
+  if (t < 46.6 || t > 51.5) return;
+  g.globalCompositeOperation = 'lighter'; g.lineCap = 'round';
+  const w = L.win;
+  for (let i = 0; i < 64; i++) {
+    const r1 = Math.sin(i * 91.7) * 0.5 + 0.5, r2 = Math.sin(i * 17.3) * 0.5 + 0.5, r3 = Math.sin(i * 43.1) * 0.5 + 0.5;
+    const t0 = 46.7 + r2 * 2.6, age = t - t0;
+    if (age < 0 || age > 1.8) continue;
+    const x = w.x + (r1 * 2 - 1) * w.hw * 0.92;
+    const y = w.y - w.hh + age * (90 + 140 * r3) * S + age * age * 260 * S;
+    const len = (14 + 30 * r3 + age * 30) * S;
+    const a = 0.55 * (1 - age / 1.8);
+    g.strokeStyle = hsl(205, 70, 82, a); g.lineWidth = 1.6 * S;
+    g.beginPath(); g.moveTo(x, y - len); g.lineTo(x, y); g.stroke();
+    dot(g, x, y, 4 * S, 205, 70, 85, a);
+  }
+}
+
+function drawSeek(g, t) {
+  for (const [a, b, a0, a1, land, target] of SEEK) {
+    if (t < a - 0.2 || t > b + 2.2) continue;
+    const ox = CX, oy = H + 60 * S;
+    let to = a1, dist = Math.min(H * 0.62, 640 * S);
+    if (target === 'child') { const dx = L.child[0] - ox, dy = L.child[1] - oy; to = Math.atan2(dx, -dy); dist = Math.hypot(dx, dy); }
+    let vis = smooth(a - 0.2, a + 0.4, t) * (1 - smooth(b + 0.3, b + 1.6, t));
+    if (land < 0) vis *= (t > 153.3 && t < 153.5 ? 0.2 : 1) * 0.6;   // flicker, then out
+    if (vis < 0.01) continue;
+    const ang = lerp(a0, to, smooth(a, b, t)) + 0.02 * Math.sin(u * 3);
+    const len = H * 1.4, hw = 0.075;
+    const dx = Math.sin(ang), dy = -Math.cos(ang);
+    g.globalCompositeOperation = 'lighter';
+    const gr = g.createLinearGradient(ox, oy, ox + dx * len, oy + dy * len);
+    gr.addColorStop(0, hsl(210, 30, 88, 0.32 * vis)); gr.addColorStop(0.55, hsl(210, 30, 85, 0.12 * vis)); gr.addColorStop(1, hsl(210, 30, 85, 0));
+    g.fillStyle = gr;
+    g.beginPath(); g.moveTo(ox, oy);
+    g.lineTo(ox + Math.sin(ang - hw) * len, oy - Math.cos(ang - hw) * len);
+    g.lineTo(ox + Math.sin(ang + hw) * len, oy - Math.cos(ang + hw) * len);
+    g.closePath(); g.fill();
+    const sx_ = ox + dx * dist, sy_ = oy + dy * dist;
+    dot(g, sx_, sy_, 120 * S, 210, 30, 80, 0.22 * vis, true);
+    if (land > 0) {
+      const k = swell(t, land, 0.15, 1.3);
+      if (k > 0.01) {
+        // what the light finds: an empty ring where someone should be
+        g.setLineDash([7 * S, 9 * S]);
+        g.strokeStyle = hsl(210, 25, 92, 0.75 * k); g.lineWidth = 2 * S;
+        g.beginPath(); g.arc(sx_, sy_, (34 + 14 * (1 - k)) * S, 0, TAU); g.stroke();
+        g.setLineDash([]);
+      }
+    }
+  }
+}
+
+function drawFatherhood(g, t, b) {
+  const fv = track(TR.father, t);
+  if (fv < 0.01) return;
+  g.globalCompositeOperation = 'lighter';
+  const fh = track(TR.fHue, t), dim = 1 - 0.45 * smooth(105.4, 106.4, t) * (1 - smooth(108, 112, t));
+  const [fx, fy] = L.father;
+  orb(g, fx, fy, 24 * S * (1 + 0.15 * b.pump), fh, 80, 62, fv * dim);
+  // the child: born out of the father's light, drifts out, turns cold
+  const kv = track(TR.kid, t);
+  if (kv > 0.01) {
+    const kh = track(TR.kidHue, t), [kx, ky] = L.kid;
+    orb(g, kx, ky, 11 * S * (1 + 0.1 * b.pump), kh, 75, 66, kv);
+    // the tether between them thins out as the distance grows
+    const teth = kv * fv * (1 - smooth(96.8, 100, t)) * 0.3;
+    if (teth > 0.01) { g.strokeStyle = hsl(40, 70, 70, teth); g.lineWidth = 1.2 * S; g.beginPath(); g.moveTo(fx, fy); g.lineTo(kx, ky); g.stroke(); }
+    // grandchildren drifting out of reach
+    const bk = smooth(99.6, 103.8, t), bv = smooth(98.8, 99.4, t) * (1 - bk) * kv;
+    if (bv > 0.01) for (let i = 0; i < 3; i++) {
+      const a = i * 2.1 + 0.6;
+      orb(g, kx + Math.cos(a) * (28 * S + bk * 640 * S), ky + Math.sin(a) * (22 * S + bk * 420 * S), 5 * S, 42, 70, 70, bv);
+    }
+  }
+  // warmth passed from father to child
+  if (t > 92.5 && t < 93.9) {
+    const [kx, ky] = L.kid;
+    for (let i = 0; i < 3; i++) {
+      const k = rnd();
+      dot(g, lerp(fx, kx, k) + (rnd() - 0.5) * 8 * S, lerp(fy, ky, k) + (rnd() - 0.5) * 8 * S, 6 * S, 45, 90, 75, 0.6 * fv);
+    }
+  }
+  // a comet he goes after
+  const ck = (t - 112.25) / 1.5;
+  if (ck > 0 && ck < 1.4) {
+    for (let j = 0; j < 26; j++) {
+      const k = clamp(ck - j * 0.018, 0, 1), e = 1 - Math.pow(1 - k, 2);
+      const x = lerp(-0.08 * W, 1.12 * W, e), y = lerp(0.24 * H, 0.1 * H, e) + Math.sin(e * 5) * 12 * S;
+      dot(g, x, y, (16 - j * 0.5) * S, 48, 85, 80, (1 - j / 26) * (1 - smooth(1, 1.4, ck)));
+    }
+  }
+  // regrets: echo rings that never come back
+  for (const st of SHOULD) {
+    const age = t - snap(st);
+    if (age < 0 || age > 2.6) continue;
+    g.strokeStyle = hsl(fh, 60, 70, 0.55 * Math.pow(1 - age / 2.6, 2)); g.lineWidth = 2 * S;
+    g.beginPath(); g.arc(fx, fy, 40 * S + age * 330 * S, 0, TAU); g.stroke();
+  }
+  for (const ct of CALLED) for (const off of [0, 0.2]) {
+    const age = t - snap(ct) - off;
+    if (age < 0 || age > 2) continue;
+    g.strokeStyle = hsl(210, 40, 80, 0.5 * Math.pow(1 - age / 2, 2)); g.lineWidth = 1.2 * S;
+    g.beginPath(); g.arc(fx, fy, 30 * S + age * 260 * S, 0, TAU); g.stroke();
+  }
+}
+
+function drawSmoke(g, t, dt) {
+  const rate = track(TR.smoke, t);
+  smokeAcc += rate * 20 * dt;
+  while (smokeAcc >= 1) {
+    smokeAcc -= 1;
+    puffs.push({ x: CX - 60 * S + (rnd() - 0.5) * 50 * S, y: CY + 210 * S, vx: (rnd() - 0.5) * 24 * S, vy: -(30 + rnd() * 45) * S, r: 16 * S, life: 0, max: 4.5 + rnd() * 3, h: rnd() < 0.65 ? 272 : 150 });
+  }
+  g.globalCompositeOperation = 'lighter';
+  for (let i = puffs.length - 1; i >= 0; i--) {
+    const p = puffs[i];
+    p.life += dt;
+    if (p.life > p.max) { puffs.splice(i, 1); continue; }
+    const n = noise2(p.x / (180 * S), p.y / (180 * S) + u * 0.08);
+    p.vx += Math.cos(n * TAU * 1.5) * 40 * S * dt;
+    p.x += p.vx * dt; p.y += p.vy * dt; p.r += 26 * S * dt;
+    dot(g, p.x, p.y, p.r, p.h, 22, 62, 0.11 * Math.sin(Math.PI * p.life / p.max), true);
+  }
+}
+
+function drawVerse3(g, t, b) {
+  g.globalCompositeOperation = 'lighter';
+  // his mother's light
+  const sv = track(TR.sheila, t);
+  if (sv > 0.01) orb(g, CX - 220 * S, CY + 60 * S + Math.sin(u) * 6 * S, 14 * S, 340, 60, 72, sv * (0.85 + 0.15 * Math.sin(u * 1.7)));
+  // a warmer light somewhere else, drifting off
+  const ov = track(TR.other, t);
+  if (ov > 0.01) orb(g, W * 0.12 - smooth(183, 187.4, t) * 240 * S, CY - 140 * S, 16 * S, 330, 70, 70, ov);
+  // the empty house
+  const hv = track(TR.house, t);
+  if (hv > 0.01) {
+    const k = track(TR.houseK, t), hx = CX, hy = CY + 40 * S;
+    g.save(); g.translate(hx, hy); g.scale(S, S);
+    g.lineJoin = 'round'; g.lineCap = 'round';
+    for (const pass of [0, 1]) {
+      g.strokeStyle = pass ? hsl(205, 25, 82, hv * 0.8) : hsl(205, 50, 60, hv * 0.18 * (1 + 0.5 * b.pump));
+      g.lineWidth = pass ? 2 : 8;
+      for (const h of HOUSE) {
+        g.setLineDash([h.len * k, h.len + 1]);
+        g.beginPath(); h.pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.stroke();
+      }
+    }
+    g.setLineDash([]);
+    // someone coming back - the door warms, but nobody arrives
+    const cb = track(TR.comeBack, t);
+    if (cb > 0.01) {
+      const gr = g.createLinearGradient(0, 170, 0, 40);
+      gr.addColorStop(0, hsl(35, 80, 60, 0.35 * cb)); gr.addColorStop(1, hsl(35, 80, 60, 0));
+      g.fillStyle = gr; g.fillRect(-42, 40, 84, 130);
+    }
+    g.restore();
+    if (cb > 0.01) {
+      const k2 = smooth(177.5, 180.2, t) * 0.72;
+      orb(g, lerp(W + 60 * S, hx, k2), lerp(CY + 230 * S, hy + 130 * S, k2), 9 * S, 35, 85, 70, cb);
+    }
+  }
+}
+
+function drawChildhood(g, t, b) {
+  g.globalCompositeOperation = 'lighter';
+  const cv_ = track(TR.child, t), mv = track(TR.mama, t);
+  const fault = 1 - 0.4 * smooth(37.8, 38.7, t) * (1 - smooth(50.5, 51, t));
+  const rage = after(t, snap(52.38), 0.5) + after(t, snap(54.72), 0.5);
+  if (mv > 0.01) {
+    const hit = after(t, snap(50.84), 0.6);
+    orb(g, L.mama[0], L.mama[1], 15 * S * (1 + 0.08 * Math.sin(u * 1.3)), lerpHue(345, 0, hit), lerp(55, 90, hit), 70, mv * fault);
+  }
+  if (cv_ > 0.01) {
+    const me = swell(t, 31.02, 0.2, 1);
+    orb(g, L.child[0], L.child[1], 9 * S * (1 + 0.1 * Math.sin(u * 1.6) + 0.3 * rage + 0.2 * me), lerpHue(48, 5, clamp(rage)), 70 + 20 * clamp(rage), 72, cv_ * fault);
+  }
+  // the outro's "oh"s swell around everything
+  for (const o of OH) {
+    const k = swell(t, o, 0.35, 1.4);
+    if (k < 0.01) continue;
+    const age = t - o;
+    g.strokeStyle = hsl(pal.hue, 35, 80, 0.35 * k); g.lineWidth = 8 * S;
+    g.beginPath(); g.arc(CX, CY, 120 * S + age * 230 * S, 0, TAU); g.stroke();
+    g.strokeStyle = hsl(pal.hue, 25, 92, 0.5 * k); g.lineWidth = 1.5 * S; g.stroke();
+  }
+}
+
+// ===== compositing: scene -> screen with optional drunk warp, bloom, flash, vignette, grain =====
+function composite(t, bloom, flash, flashHue, warp) {
+  ctx.globalCompositeOperation = 'copy'; ctx.globalAlpha = 1;
+  if (warp > 0.01) {
+    // 'copy' would wipe everything outside each strip, so clear once and draw strips over it
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'source-over';
+    const sh = Math.max(4, Math.round(6 * DPR));
+    for (let y = 0; y < H; y += sh) {
+      const f = y / H;
+      const dx = warp * S * (16 * Math.sin(f * 9 + u * 2.1) + 7 * Math.sin(f * 23 - u * 3.3));
+      ctx.drawImage(scene, 0, y, W, sh, dx, y + warp * 3 * S * Math.sin(u * 1.7 + f * 4), W, sh);
+    }
+  } else ctx.drawImage(scene, 0, 0);
+  g1x.globalCompositeOperation = 'copy'; g1x.drawImage(cv, 0, 0, g1.width, g1.height);
+  g2x.globalCompositeOperation = 'copy'; g2x.drawImage(g1, 0, 0, g2.width, g2.height);
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = bloom * 0.5; ctx.drawImage(g1, 0, 0, W, H);
+  ctx.globalAlpha = bloom; ctx.drawImage(g2, 0, 0, W, H);
+  if (warp > 0.01) { ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'soft-light'; ctx.fillStyle = hsl(32, 90, 50, warp * 0.35); ctx.fillRect(0, 0, W, H); }
+  if (flash > 0.004) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 1; ctx.fillStyle = hsl(flashHue, 60, 60, Math.min(0.6, flash)); ctx.fillRect(0, 0, W, H); }
+  ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+  ctx.drawImage(vig, 0, 0);
+  ctx.globalCompositeOperation = 'overlay'; ctx.globalAlpha = 0.07;
+  const ox = Math.floor(rnd() * 256), oy = Math.floor(rnd() * 256);
+  ctx.save(); ctx.translate(-ox, -oy); ctx.fillStyle = grainPat; ctx.fillRect(ox, oy, W, H); ctx.restore();
+  ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+}
+
+function spaced(text, x, y, gap) {
+  const ws = [...text].map(c => ctx.measureText(c).width);
+  let cx = x - (ws.reduce((a, b) => a + b, 0) + gap * (ws.length - 1)) / 2;
+  ctx.textAlign = 'left';
+  [...text].forEach((c, i) => { ctx.fillText(c, cx, y); cx += ws[i] + gap; });
+  ctx.textAlign = 'center';
+}
+
+function drawUI(t) {
+  const fs = Math.max(12 * DPR, 15 * S), font = '"Helvetica Neue", Helvetica, Arial, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const y = Math.min(H - 125 * S, CY + 360 * S);
+  if (loadError) {
+    ctx.font = `${fs}px ${font}`; ctx.fillStyle = 'rgba(255,200,200,0.9)';
+    ctx.fillText(`couldn't load ${SRC} — keep it in the same folder as this page`, CX, y);
+    return;
+  }
+  if (!started) {
+    ctx.font = `200 ${fs * 1.7}px ${font}`; ctx.fillStyle = 'rgba(235,230,245,0.85)';
+    spaced(TITLE.toUpperCase(), CX, y, fs * 0.9);
+    ctx.font = `300 ${fs}px ${font}`; ctx.fillStyle = `rgba(210,210,230,${0.45 + 0.3 * Math.sin(u * 2)})`;
+    ctx.fillText(ended ? 'click to play again' : 'click to play', CX, y + fs * 2.4);
+    return;
+  }
+  if (audio.paused) {
+    ctx.font = `300 ${fs}px ${font}`; ctx.fillStyle = 'rgba(210,210,230,0.7)';
+    ctx.fillText('paused', CX, y + fs * 2.4);
+  }
+}
+
+const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+function rrect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r); ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h); ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+// keyboard legend, top-left; dims while playing until the mouse or a key is used
+const LEGEND = [[['Space'], 'Play / pause'], [['←', '→'], 'Skip 10 s'], [['H'], 'Hide keys']];
+const UI_FONT = 'system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif';
+const KEY_H = 22, KEY_R = 5, KEY_FS = 11.5;
+const keyW = k => Math.max(KEY_H, ctx.measureText(k).width / DPR + 14) * DPR;
+// a keycap: soft raised face, hairline border, darker bottom lip
+function keycap(x, cy, k) {
+  const w = keyW(k), h = KEY_H * DPR, r = KEY_R * DPR, y = cy - h / 2;
+  ctx.fillStyle = 'rgba(0,0,0,0.45)'; rrect(x, y + 1.5 * DPR, w, h, r); ctx.fill();
+  const gr = ctx.createLinearGradient(0, y, 0, y + h);
+  gr.addColorStop(0, 'rgba(255,255,255,0.17)'); gr.addColorStop(1, 'rgba(255,255,255,0.09)');
+  ctx.fillStyle = gr; rrect(x, y, w, h, r); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.16)'; ctx.lineWidth = DPR; rrect(x + 0.5 * DPR, y + 0.5 * DPR, w - DPR, h - DPR, r); ctx.stroke();
+  ctx.fillStyle = 'rgba(245,245,252,0.95)'; ctx.textAlign = 'center';
+  ctx.fillText(k, x + w / 2, cy + 0.5 * DPR);
+  return w;
+}
+function drawLegend(du) {
+  const active = !started || audio.paused || u - ui.moved < 3;
+  ui.la = lerp(ui.la, ui.legend ? (active ? 1 : 0.3) : 0, 1 - Math.pow(0.02, du));
+  const pad = 20 * DPR, inner = 14 * DPR, row = 30 * DPR, gap = 4 * DPR, colGap = 14 * DPR;
+  const keyFont = `500 ${KEY_FS * DPR}px ${UI_FONT}`, textFont = `400 ${12.5 * DPR}px ${UI_FONT}`;
+  ctx.textBaseline = 'middle';
+  if (ui.la < 0.02) {   // hidden: leave a faint way back
+    ctx.globalAlpha = 0.45; ctx.font = keyFont;
+    const w = keycap(pad, pad + KEY_H * DPR / 2, 'H');
+    ctx.font = textFont; ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(220,220,235,0.8)';
+    ctx.fillText('Keys', pad + w + 8 * DPR, pad + KEY_H * DPR / 2);
+    ctx.globalAlpha = 1;
+    return;
+  }
+  ctx.font = keyFont;
+  const keysW = Math.max(...LEGEND.map(([ks]) => ks.reduce((s, k) => s + keyW(k), 0) + gap * (ks.length - 1)));
+  ctx.font = textFont;
+  const textW = Math.max(...LEGEND.map(([, d]) => ctx.measureText(d).width));
+  const bw = inner * 2 + keysW + colGap + textW, bh = inner * 2 + LEGEND.length * row - (row - KEY_H * DPR);
+  ctx.globalAlpha = ui.la;
+  ctx.fillStyle = 'rgba(12,10,20,0.6)'; rrect(pad, pad, bw, bh, 12 * DPR); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = DPR; rrect(pad + 0.5 * DPR, pad + 0.5 * DPR, bw - DPR, bh - DPR, 12 * DPR); ctx.stroke();
+  LEGEND.forEach(([ks, d], i) => {
+    const cy = pad + inner + KEY_H * DPR / 2 + i * row;
+    ctx.font = keyFont;
+    let kx = pad + inner;
+    for (const k of ks) kx += keycap(kx, cy, k) + gap;
+    ctx.font = textFont; ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(220,220,232,0.78)';
+    ctx.fillText(d, pad + inner + keysW + colGap, cy + 0.5 * DPR);
+  });
+  ctx.globalAlpha = 1;
+}
+
+// timeline: chorus spans tinted, playhead knob, times, hover preview; drag to scrub
+const CHORUS_SPANS = [[SEC.ch1, SEC.in1], [SEC.ch2, SEC.in2], [SEC.ch3, SEC.outro]];
+function drawTimeline(t, du) {
+  const b = bar(), dur = songDur(), w = b.x1 - b.x0, X = s => b.x0 + w * clamp(s / dur);
+  const pos = clamp((started || ended ? t : 0) / dur);
+  // minimised to a hairline unless the cursor comes near the bottom edge (or a scrub is in progress)
+  const near = ui.drag || (ui.my >= 0 && ui.my > H - 120 * DPR);
+  ui.ex = lerp(ui.ex, near ? 1 : 0, 1 - Math.pow(0.0005, du));
+  if (ui.ex < 0.995) {
+    ctx.globalAlpha = 1 - ui.ex;
+    ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fillRect(0, H - 2 * DPR, W, 2 * DPR);
+    ctx.fillStyle = hsl(pal.hue, 40, 70, 0.35); ctx.fillRect(0, H - 2 * DPR, W * pos, 2 * DPR);
+    ctx.globalAlpha = 1;
+  }
+  if (ui.ex < 0.005) return;
+  const th = (ui.hover || ui.drag ? 6 : 4) * DPR, font = '"Helvetica Neue", Helvetica, Arial, sans-serif';
+  ctx.save();
+  ctx.translate(0, (1 - ui.ex) * 14 * DPR);
+  ctx.globalAlpha = ui.ex;
+  // soft floor so the bar reads over bright frames
+  const gr = ctx.createLinearGradient(0, b.top - 20 * DPR, 0, H);
+  gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,0.55)');
+  ctx.fillStyle = gr; ctx.fillRect(0, b.top - 20 * DPR, W, H - b.top + 20 * DPR);
+  ctx.fillStyle = 'rgba(255,255,255,0.14)'; rrect(b.x0, b.y - th / 2, w, th, th / 2); ctx.fill();
+  ctx.fillStyle = 'rgba(200,40,60,0.35)';
+  for (const [a, e] of CHORUS_SPANS) ctx.fillRect(X(a), b.y - th / 2, X(e) - X(a), th);
+  const px = X(pos * dur);
+  ctx.fillStyle = hsl(pal.hue, 55, 72, 0.95); rrect(b.x0, b.y - th / 2, Math.max(th, px - b.x0), th, th / 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(px, b.y, (ui.hover || ui.drag ? 8 : 6) * DPR, 0, TAU);
+  ctx.fillStyle = 'rgba(245,242,255,0.95)'; ctx.fill();
+  ctx.font = `300 ${11 * DPR}px ${font}`; ctx.textBaseline = 'middle'; ctx.fillStyle = 'rgba(225,225,240,0.8)';
+  ctx.textAlign = 'left'; ctx.fillText(mmss(started || ended ? t : 0), b.x0, b.y - 18 * DPR);
+  ctx.textAlign = 'right'; ctx.fillText(mmss(dur), b.x1, b.y - 18 * DPR);
+  if (ui.hover || ui.drag) {
+    const hx = clamp(ui.mx, b.x0, b.x1), label = mmss(clamp((hx - b.x0) / w) * dur);
+    ctx.font = `500 ${11 * DPR}px ${font}`;
+    const lw = ctx.measureText(label).width + 12 * DPR;
+    ctx.fillStyle = 'rgba(10,8,18,0.8)'; rrect(hx - lw / 2, b.y - 40 * DPR, lw, 18 * DPR, 4 * DPR); ctx.fill();
+    ctx.fillStyle = 'rgba(245,245,255,0.95)'; ctx.textAlign = 'center'; ctx.fillText(label, hx, b.y - 31 * DPR);
+  }
+  ctx.restore();
+}
+
+// ===== main loop =====
+function frame() {
+  requestAnimationFrame(frame);
+  const now = performance.now() / 1000, du = Math.min(0.1, now - lastU);
+  lastU = now; u += du;
+  const t = ended ? 238 : songTime();
+  let dt = t - lastT;
+  if (dt < -0.25 || dt > 0.5) { resync(t); dt = 0; }
+  dt = clamp(dt, 0, 0.1);
+  lastT = t;
+
+  pal = palette(t);
+  layout(t);
+  const b = beatAt(t);
+  b.pump = Math.exp(-b.since * 9) + (b.since > 0.17 ? 0.55 * Math.exp(-(b.since - 0.17) * 10) : 0);   // lub-dub
+  b.pump *= 0.5 + 0.6 * b.acc;
+  const energy = 0.5 * env(BASS, t) + 0.5 * env(MID, t);
+  const blood = track(TR.blood, t);
+
+  // events crossed since the last frame (skipped when they are stale, e.g. after a seek)
+  if (b.i !== beatPtr) { if (b.i === beatPtr + 1 && b.since < 0.2) onBeat(b, t); beatPtr = b.i; }
+  while (wordPtr < WORDS.length && WORDS[wordPtr][0] <= t) { if (t - WORDS[wordPtr][0] < 0.3) onWord(WORDS[wordPtr], t); wordPtr++; }
+  while (burstPtr < BURSTS.length && BURSTS[burstPtr][0] <= t) { if (t - BURSTS[burstPtr][0] < 0.3) onBurst(BURSTS[burstPtr][1], t); burstPtr++; }
+  recRot += dt * 3.49 * track(TR.spin, t);
+  coreKick *= Math.pow(0.05, du);
+
+  // camera: breathe with the kick, shake on impacts
+  let shake = 0, flash = 0;
+  for (const [ti, amp] of IMPACTS) { shake += amp * after(t, ti, 0.22); flash += amp * 0.45 * after(t, ti, 0.1); }
+  if (t > 188.45 && t < 190.4) shake += 0.35 * after(b.since, 0, 0.06);
+  flash += blood * b.pump * (b.down ? 0.06 : 0.025) * env(BASS, t);
+  const zoom = 1 + 0.018 * b.pump * (0.3 + blood) + 0.012 * env(BASS, t) * blood;
+  const shx = shake * 18 * S * noise2(u * 23, 1.3), shy = shake * 18 * S * noise2(7.1, u * 23);
+
+  // background layer
+  drawSky(sx, t, b);
+  sx.setTransform(zoom, 0, 0, zoom, CX - CX * zoom + shx, CY - CY * zoom + shy);
+  drawStars(sx, t, track(TR.stars, t));
+  drawRays(sx, t, track(TR.rays, t));
+  drawMoon(sx, t, track(TR.moon, t), b);
+  drawWindow(sx, track(TR.window, t));
+  drawRecord(sx, t, b, track(TR.record, t), blood);
+  drawVeins(sx, t, b, track(TR.veins, t));
+  drawRings(sx, t);
+  drawSmoke(sx, t, dt);
+  drawVerse3(sx, t, b);
+  drawSeek(sx, t);
+  drawCracks(sx, t);
+  drawCross(sx, t);
+  drawChildhood(sx, t, b);
+  drawFatherhood(sx, t, b);
+  drawTears(sx, t);
+  drawDust(sx, du, t, energy, blood);
+  sx.setTransform(1, 0, 0, 1, 0, 0);
+
+  // particle layer with motion trails
+  tx.globalCompositeOperation = 'destination-out';
+  tx.globalAlpha = 1 - Math.pow(0.72, du * 60);
+  tx.fillRect(0, 0, W, H);
+  tx.globalAlpha = 1;
+  updateParticles(tx, dt);
+  sx.globalCompositeOperation = 'lighter'; sx.globalAlpha = 1;
+  sx.drawImage(trail, 0, 0);
+  sx.globalCompositeOperation = 'source-over';
+
+  composite(t, 0.5 + 0.35 * blood + 0.25 * b.pump * blood + 0.3 * coreKick, flash, pal.hue, track(TR.warp, t));
+  drawUI(t);
+  if (started && t > 5 && !ui.autoHidden) { ui.autoHidden = true; ui.legend = false; }   // fold the legend away once playback is underway
+  if (!loadError) { drawTimeline(t, du); drawLegend(du); }
+}
+
+addEventListener('resize', resize);
+resize();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
